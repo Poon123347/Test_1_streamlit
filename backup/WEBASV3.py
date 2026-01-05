@@ -7,10 +7,55 @@ Entrez.email = "poonthakorn@gmail.com"
 species_accessions = {
     "Human": "NC_012920.1",
     "Chimpanzee": "NC_001643.1",
-    "Gorilla": "NC_001645.1",
-    "Orangutan": "NC_002083.1"
-    # เพิ่มสายพันธุ์ได้ตามต้องการ
+    "Bonobo": "NC_001644.1",
+    "WesternGorilla": "NC_001645.1",
+    "EasternGorilla": "NC_011120.1",
+    "SumatranOrangutan": "NC_002083.1",
+    "BorneanOrangutan": "NC_001646.1",
+    "CommonGibbon": "NC_002082.1",
+    "RhesusMacaque": "NC_005943.1",
+    "CrabEatingMacaque": "NC_012670.1",
+    "BarbaryApe": "NC_002764.1",
+    # "HamadrayasBaboons": "NC_001992.1",
+    # "GreenMonkey": "NC_008066.1",
+    # "TantalusMonkey": "NC_009748.1",
+    # "DuskyLeafMonkey": "NC_006900.1",
+    # "ProboscisMonkey": "NC_008216.1",
+    # "RedShankedDouc": "NC_008220.1",
+    # "TonkinSnubNoseMonkey": "NC_015485.1",
+    # "ColobusMonkey": "NC_006901.1",
+    # "BlackColobus": "NC_008219.1",
+    # "Babirusa": "NC_012732.1",
+    # "Pig": "NC_000845.1",
+    # "Cow": "NC_001567.1",
+    # "Horse": "NC_001640.1",
+    # "Dog": "NC_002008.4",
+    # "Cat": "NC_001700.1",
+    # "Sheep": "NC_001941.1",
+    # "Goat": "NC_005044.2",
+    # "Camel": "NC_009628.1",
+    # "Pig-tailedMacaque": "NC_001715.1",
+    # "NorwayRat": "NC_001665.2",
+    # "Mouse": "NC_005089.1",
+    # "Rabbit": "NC_001913.1",
+    # "Elephant": "NC_003319.1",
+    # "WoollyMammoth": "NC_007596.1",
+    # "BrownBear": "NC_003427.1",
+    # "PolarBear": "NC_003428.1",
+    # "Squirrel": "NC_004742.1",
+    # "Beaver": "NC_011112.1",
+    # "Koala": "NC_026731.1",
+    # "Platypus": "NC_000891.1",
+    # "Chicken": "NC_001323.1",
+    # "Turkey": "NC_010195.1",
+    # "Duck": "NC_009684.1",
+    # "Ostrich": "NC_002785.1",
+    # "ZebraFinch": "NC_007897.1",
+    # "Lizard": "NC_001323.1",  # same reference but can replace with reptile of interest
+    # "Salmon": "NC_002980.1",
+    # "Zebrafish": "NC_002333.2"
 }
+
 
 # ฟังก์ชันดึงลำดับ ND5 gene จาก accession number
 def extract_nd5(accession_id):
@@ -61,7 +106,7 @@ if st.button("ดึง ND5 และสร้างปุ่มดาวน์�
     print("Download",nd5_seqs)
 
 st.divider()
-st.subheader("ไฟล์ดาวน์โหลด & แสดง DNA ที่ดึงมา")
+st.subheader("ไฟล์ดาวน์โหลดและแสดง DNA ที่ดึงมา")
 nd5_seqs = st.session_state.nd5_seqs
 print("after download",nd5_seqs)
 if nd5_seqs:
