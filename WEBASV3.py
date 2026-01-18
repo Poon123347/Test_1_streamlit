@@ -31,6 +31,13 @@ st.markdown(
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
+st.radio(
+    "🎨 Theme",
+    ["Dark", "Light"],
+    key="theme_mode",
+    horizontal=True
+)
+
 Theme = st.selectbox(
     "🎨 Theme",
     ["Dark", "Light"],
