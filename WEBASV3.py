@@ -38,11 +38,6 @@ st.radio(
     horizontal=True
 )
 
-Theme = st.selectbox(
-    "🎨 Theme",
-    ["Dark", "Light"],
-    index=0
-)
 
 DARK = {
     "BG": "#0d1117",
