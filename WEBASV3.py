@@ -693,11 +693,12 @@ DNA และ RNA ที่ไม่เข้ารหัส
 # ===============================
 # LANGUAGE SELECTOR (SIDEBAR)
 # ===============================
-language = st.sidebar.selectbox(
+language = st.selectbox(
     "🌐 Language / ภาษา",
-    options=["English", "ภาษาไทย"],
+    ["English", "ภาษาไทย"],
     index=0
 )
+
 
 T = LANGS[language]
 
