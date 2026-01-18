@@ -31,12 +31,11 @@ st.markdown(
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
-with st.sidebar:
-    st.radio(
-        "🎨 Theme",
-        ["Dark", "Light"],
-        key="theme_mode"
-    )
+Theme = st.selectbox(
+    "🎨 Theme",
+    ["Dark", "Light"],
+    index=0
+)
 
 DARK = {
     "BG": "#0d1117",
