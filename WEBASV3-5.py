@@ -11,7 +11,6 @@ from Bio.Align import MultipleSeqAlignment
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from copy import deepcopy
-from matplotlib.collections import LineCollection
 plt.rcParams["toolbar"] = "None"
 
 # ========== PAGE CONFIG ==========
@@ -49,7 +48,6 @@ DARK = {
     "CODE_TEXT": "#d1d7e0",
     "BTN_BG": "#238636",
     "BTN_TEXT": "#ffffff",
-    "TREE_BORDER_BG" : "#9ca3af"
 }
 
 LIGHT = {
@@ -63,7 +61,6 @@ LIGHT = {
     "CODE_TEXT": "#111827",
     "BTN_BG": "#2563eb",
     "BTN_TEXT": "#ffffff",
-    "TREE_BORDER_BG" : "#d8e6fe"
 }
 
 
@@ -83,171 +80,151 @@ for k in ["TEXT", "TEXT_MUTED"]:
 # CSS INJECTION
 # ===============================1
 st.markdown(
-f"""
-<style>
+    f"""
+    <style>
 
-/* ================== THEME VARIABLES ================== */
-:root {{
-    --bg: {THEME["BG"]};
-    --text: {THEME["TEXT"]};
-    --sidebar-bg: {THEME["SIDEBAR_BG"]};
-    --panel-bg: {THEME["PANEL_BG"]};
-    --border: {THEME["BORDER"]};
-    --btn-bg: {THEME["BTN_BG"]};
-    --btn-text: {THEME["BTN_TEXT"]};
-    --code-bg: {THEME["CODE_BG"]};
-    --code-text: {THEME["CODE_TEXT"]};
-}}
+    /* ========== THEME VARIABLES ========== */
+    :root {{
+        --bg: {THEME["BG"]};
+        --text: {THEME["TEXT"]};
+        --sidebar-bg: {THEME["SIDEBAR_BG"]};
+        --panel-bg: {THEME["PANEL_BG"]};
+        --border: {THEME["BORDER"]};
+        --btn-bg: {THEME["BTN_BG"]};
+        --btn-text: {THEME["BTN_TEXT"]};
+        --code-bg: {THEME["CODE_BG"]};
+        --code-text: {THEME["CODE_TEXT"]};
+    }}
 
-/* ================== GLOBAL ================== */
-.stApp {{
-    background-color: var(--bg) !important;
-    color: var(--text) !important;
-}}
+    /* ========== GLOBAL ========== */
+    .stApp {{
+        background-color: var(--bg) !important;
+        color: var(--text) !important;
+    }}
 
-html, body, div, span, p, label,
-h1, h2, h3, h4, h5, h6 {{
-    color: var(--text) !important;
-}}
+    html, body, div, span, p, label,
+    h1, h2, h3, h4, h5, h6 {{
+        color: var(--text) !important;
+    }}
 
-/* ================== SIDEBAR ================== */
-section[data-testid="stSidebar"] {{
-    background-color: var(--sidebar-bg) !important;
-    border-right: 1px solid var(--border) !important;
-}}
+    /* ========== SIDEBAR ========== */
+    section[data-testid="stSidebar"] {{
+        background-color: var(--sidebar-bg) !important;
+        border-right: 1px solid var(--border) !important;
+    }}
 
-/* ================== BUTTONS ================== */
-.stButton {{
-    display: inline-block !important;
-}}
+    /* ========== NORMAL BUTTONS ========== */
+    .stButton {{
+        display: inline-block !important;
+    }}
 
-.stButton button {{
-    background-color: var(--btn-bg) !important;
-    color: var(--btn-text) !important;
-    border-radius: 10px !important;
-    padding: 0.4rem 1rem !important;
-    min-width: 120px;
-    height: 40px;
-    border: none !important;
-}}
+    .stButton button {{
+        background-color: var(--btn-bg) !important;
+        color: var(--btn-text) !important;
+        border-radius: 10px !important;
+        padding: 0.4rem 1rem !important;
+        width: auto !important;
+        min-width: 120px;
+        height: 40px;
+    }}
 
-/* ================== DOWNLOAD BUTTON ================== */
-.stDownloadButton {{
-    display: inline-block !important;
-}}
+    /* ========== DOWNLOAD BUTTON (BLACK BAR FIX) ========== */
+    .stDownloadButton {{
+        display: inline-block !important;
+    }}
 
-.stDownloadButton button {{
-    background-color: var(--btn-bg) !important;
-    color: var(--btn-text) !important;
-    border-radius: 12px !important;
-    padding: 0.45rem 1.2rem !important;
-    min-width: 240px;
-    height: 42px;
-    border: none !important;
-}}
+    div[data-testid="stDownloadButton"] {{
+        width: auto !important;
+        max-width: fit-content !important;
+        background: transparent !important;
+    }}
 
-.stDownloadButton svg {{
-    fill: var(--btn-text) !important;
-}}
+    /* BaseWeb wrapper — THIS was the black bar */
+    div[data-baseweb="button"] {{
+        background: transparent !important;
+        box-shadow: none !important;
+    }}
 
-div[data-baseweb="button"] {{
-    background: transparent !important;
-    box-shadow: none !important;
-}}
+    .stDownloadButton button {{
+        background-color: var(--btn-bg) !important;
+        color: var(--btn-text) !important;
+        border-radius: 12px !important;
+        padding: 0.45rem 1.2rem !important;
+        width: auto !important;
+        min-width: 240px;
+        height: 42px;
+    }}
 
-/* ================== EXPANDER ================== */
-div[data-testid="stExpander"] summary {{
-    background-color: var(--panel-bg) !important;
-    color: var(--text) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
-}}
+    .stDownloadButton svg {{
+        fill: var(--btn-text) !important;
+        background: transparent !important;
+    }}
 
-div[data-testid="stExpander"] summary span,
-div[data-testid="stExpander"] summary svg {{
-    color: var(--text) !important;
-    fill: var(--text) !important;
-}}
+    /* ========== PANELS ========== */
+    .stExpander > div,
+    div[data-testid="stMetric"],
+    div[data-testid="stDataFrame"] {{
+        background-color: var(--panel-bg) !important;
+        border: 1px solid var(--border) !important;
+        border-radius: 12px !important;
+    }}
 
-div[data-testid="stExpander"] div[role="region"] {{
-    background-color: var(--panel-bg) !important;
-    border: 1px solid var(--border) !important;
-    border-top: none !important;
-    border-radius: 0 0 12px 12px !important;
-    padding: 16px !important;
-}}
+    /* ========== CODE BLOCKS ========== */
+    pre, code {{
+        background-color: var(--code-bg) !important;
+        color: var(--code-text) !important;
+    }}
 
-/* ================== PANELS / CARDS ================== */
-div[data-testid="stMetric"],
-div[data-testid="stDataFrame"] {{
-    background-color: var(--panel-bg) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-}}
+    /* ========== SELECT / MULTISELECT ========== */
+    div[data-baseweb="select"] > div {{
+        background-color: var(--panel-bg) !important;
+        border: 1px solid var(--border) !important;
+    }}
 
-/* ================== CODE BLOCKS ================== */
-pre, code {{
-    background-color: var(--code-bg) !important;
-    color: var(--code-text) !important;
-    border-radius: 10px !important;
-}}
+    div[data-baseweb="select"] span,
+    div[data-baseweb="select"] input {{
+        color: var(--text) !important;
+    }}
 
-/* ================== SELECT ================== */
-div[data-baseweb="select"] > div {{
-    background-color: var(--panel-bg) !important;
-    border: 1px solid var(--border) !important;
-}}
+    li[role="option"] {{
+        background-color: var(--panel-bg) !important;
+        color: var(--text) !important;
+    }}
 
-div[data-baseweb="select"] span,
-div[data-baseweb="select"] input {{
-    color: var(--text) !important;
-}}
+    /* ========== METRICS ========== */
+    div[data-testid="stMetricLabel"],
+    div[data-testid="stMetricValue"] {{
+        color: var(--text) !important;
+    }}
 
-li[role="option"] {{
-    background-color: var(--panel-bg) !important;
-    color: var(--text) !important;
-}}
+    /* ========== DIVIDER ========== */
+    hr {{
+        border-top: 1px solid var(--border) !important;
+    }}
 
-/* ================== METRICS ================== */
-div[data-testid="stMetricLabel"],
-div[data-testid="stMetricValue"] {{
-    color: var(--text) !important;
-}}
+    /* ========== PHYLO TREE SVG TEXT ========== */
+    svg text,
+    svg tspan {{
+        fill: var(--text) !important;
+    }}
 
-/* ================== DIVIDER ================== */
-hr {{
-    border-top: 1px solid var(--border) !important;
-}}
+    /* ========== REMOVE STREAMLIT UI ========== */
+    header {{
+        visibility: hidden !important;
+    }}
 
-/* ================== SVG (PHYLO TREE TEXT) ================== */
-svg text,
-svg tspan {{
-    fill: var(--text) !important;
-}}
+    div[data-testid="stToolbar"] {{
+        display: none !important;
+    }}
 
-/* ================== REMOVE STREAMLIT CHROME ================== */
-header {{
-    visibility: hidden !important;
-}}
+    button[title="View fullscreen"] {{
+        display: none !important;
+    }}
 
-div[data-testid="stToolbar"] {{
-    display: none !important;
-}}
-
-/* ================== REMOVE FULLSCREEN / TOOLBAR ================== */
-button[title="View fullscreen"],
-button[data-testid="fullscreenButton"],
-div[data-testid="stElementToolbar"] {{
-    display: none !important;
-}}
-
-</style>
-""",
-unsafe_allow_html=True
+    </style>
+    """,
+    unsafe_allow_html=True
 )
-
-
 
 # ========== NCBI CONFIG ==========
 Entrez.email = "poonthakorn@gmail.com"
@@ -801,14 +778,10 @@ def extract_nd5_cached(accession):
 
 # ========== HELPERS ==========
 def percent_identity(seq1, seq2):
-    matches, valid = 0, 0
-    for a, b in zip(seq1, seq2):
-        if a == "-" or b == "-":
-            continue
-        valid += 1
-        if a == b:
-            matches += 1
-    return round(matches / valid * 100, 2) if valid > 0 else 0.0
+    length = min(len(seq1), len(seq2))
+    matches = sum(c1 == c2 for c1, c2 in zip(seq1, seq2))
+    return round(matches / length * 100, 2)
+
 
 def build_fasta_text(seq_dict):
     s = ""
@@ -841,12 +814,20 @@ if fetch_clicked:
             for k in nd5_seqs:
                 nd5_seqs[k] = nd5_seqs[k] + "-" * (max_len - len(nd5_seqs[k]))
 
+
+
+
         st.session_state["nd5_seqs"] = nd5_seqs
         if missing_species:
             st.warning(
                 f"{T['missing_nd5']}\n\n"
                 + ", ".join(missing_species)
             )
+
+
+        
+
+
         # AUTO-COMPUTE IDENTITY MATRIX
         names = list(nd5_seqs.keys())
         matrix = []
@@ -941,7 +922,7 @@ with tab_tree:
             for clade in tree.find_clades():
                 if clade.branch_length:
                     clade.branch_length /= max_len
-        fig = plt.figure(figsize=(14, 6) , facecolor=THEME["TREE_BORDER_BG"])
+        fig = plt.figure(figsize=(14, 6) , facecolor=THEME["PANEL_BG"])
         ax = fig.add_subplot(111)
         ax.set_facecolor(THEME["PANEL_BG"])
         
@@ -952,7 +933,7 @@ with tab_tree:
             show_confidence=False,
             label_func=lambda x: str(x.name) if x.name else "")
         
-        TEXT_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
+        TREE_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#111827"
         
         ax.margins(x=0.05, y=0.2)
 
@@ -973,14 +954,13 @@ with tab_tree:
 
         # text style
         for text in ax.texts:
-            text.set_color(TEXT_COLOR)
+            text.set_color(TREE_COLOR)
 
-        BRANCH_COLOR = "#CBD5E1" if st.session_state.theme_mode == "Dark" else "#000000"
-        for collection in ax.collections:
-            if isinstance(collection, LineCollection):
-                collection.set_color(BRANCH_COLOR)
-                collection.set_linewidth(2.2)
-                collection.set_alpha(1.0)
+        for line in ax.get_lines():
+            line.set_color(TREE_COLOR)
+            line.set_linewidth(2)
+            line.set_alpha(0.95)
+
         fig.tight_layout()
         st.pyplot(fig, use_container_width=False)
         buf = BytesIO()
@@ -997,7 +977,7 @@ with tab_tree:
 
 
 # ===============================
-# RESULTS TAB 
+# RESULTS TAB
 # ===============================
 with tab_results:
     st.markdown(f"## {T['identity']}")   # 👈 หัวข้อใหญ่ขึ้น
@@ -1007,9 +987,9 @@ with tab_results:
     if df is not None:
         st.dataframe(
             df.style
-            .format("{:.2f}")
-            .background_gradient(cmap="Blues"),
-        width="stretch")
-
+              .format("{:.2f}")
+              .background_gradient(cmap="Blues"),
+            width="stretch"
+        )
     else:
         st.info(T["no_results"])
