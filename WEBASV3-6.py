@@ -65,8 +65,23 @@ LIGHT = {
     "BTN_TEXT": "#ffffff",
     "TREE_BORDER_BG" : "#d8e6fe"
 }
-THEME = DARK if st.session_state.theme_mode == "Dark" else LIGHT
+
+
 # ---------- THEME STATE (SAFE DEFAULT) ----------
+if "theme_mode" not in st.session_state:
+    st.session_state.theme_mode = "Dark"   # 👈 NO FLASHBANG
+
+# ---------- ACTIVE THEME ----------
+THEME = DARK if st.session_state.theme_mode == "Dark" else LIGHT
+TEXT_COLOR = THEME["TEXT"]
+
+# ---------- SANITY CHECK ----------
+for k in ["TEXT", "TEXT_MUTED"]:
+    assert k in THEME, f"Missing theme key: {k}"
+
+# ===============================
+# CSS INJECTION
+# ===============================1
 st.markdown(
 f"""
 <style>
@@ -75,7 +90,6 @@ f"""
 :root {{
     --bg: {THEME["BG"]};
     --text: {THEME["TEXT"]};
-    --text-muted: {THEME["TEXT_MUTED"]};
     --sidebar-bg: {THEME["SIDEBAR_BG"]};
     --panel-bg: {THEME["PANEL_BG"]};
     --border: {THEME["BORDER"]};
@@ -111,12 +125,13 @@ section[data-testid="stSidebar"] {{
     background-color: var(--btn-bg) !important;
     color: var(--btn-text) !important;
     border-radius: 10px !important;
-    padding: 0.45rem 1.1rem !important;
+    padding: 0.4rem 1rem !important;
     min-width: 120px;
     height: 40px;
     border: none !important;
 }}
 
+/* ================== DOWNLOAD BUTTON ================== */
 .stDownloadButton {{
     display: inline-block !important;
 }}
@@ -140,7 +155,7 @@ div[data-baseweb="button"] {{
     box-shadow: none !important;
 }}
 
-/* ================== EXPANDERS ================== */
+/* ================== EXPANDER ================== */
 div[data-testid="stExpander"] summary {{
     background-color: var(--panel-bg) !important;
     color: var(--text) !important;
@@ -163,7 +178,7 @@ div[data-testid="stExpander"] div[role="region"] {{
     padding: 16px !important;
 }}
 
-/* ================== PANELS ================== */
+/* ================== PANELS / CARDS ================== */
 div[data-testid="stMetric"],
 div[data-testid="stDataFrame"] {{
     background-color: var(--panel-bg) !important;
@@ -205,38 +220,32 @@ hr {{
     border-top: 1px solid var(--border) !important;
 }}
 
-/* ================== SVG (PHYLO TREE) ================== */
+/* ================== SVG (PHYLO TREE TEXT) ================== */
 svg text,
 svg tspan {{
     fill: var(--text) !important;
 }}
 
-/* =====================================================
-   DESKTOP ONLY: REMOVE STREAMLIT CHROME
-   ⚠️ DO NOT APPLY TO MOBILE
-===================================================== */
-@media (min-width: 768px) {{
+/* ================== REMOVE STREAMLIT CHROME ================== */
+header {{
+    visibility: hidden !important;
+}}
 
-    header {{
-        visibility: hidden !important;
-    }}
+div[data-testid="stToolbar"] {{
+    display: none !important;
+}}
 
-    div[data-testid="stToolbar"] {{
-        display: none !important;
-    }}
-
-    button[title="View fullscreen"],
-    button[data-testid="fullscreenButton"],
-    div[data-testid="stElementToolbar"] {{
-        display: none !important;
-    }}
+/* ================== REMOVE FULLSCREEN / TOOLBAR ================== */
+button[title="View fullscreen"],
+button[data-testid="fullscreenButton"],
+div[data-testid="stElementToolbar"] {{
+    display: none !important;
 }}
 
 </style>
 """,
 unsafe_allow_html=True
 )
-
 
 
 
@@ -732,35 +741,30 @@ st.title(T["title"])
 st.caption(T["subtitle"])
 
 # ========== UI LAYOUT: control panel ==========
-with st.container():
+controls_col, info_col = st.columns([2.2, 1])
 
-    # --- two-column row ---
-    controls_col, info_col = st.columns([2.2, 1])
+# แปลง label → English key
+with controls_col:
+    selected_labels = st.multiselect(
+    T["select_species"],
+    options=list(species_display.values()),
+    placeholder=T["choose_options"],
+    key="species_multiselect"
+)
 
-    # ===== LEFT: species selector + fetch button =====
-    with controls_col:
-        selected_labels = st.multiselect(
-            T["select_species"],
-            options=list(species_display.values()),
-            placeholder=T["choose_options"],
-            key="species_multiselect"
-        )
 
-        # label → English key
-        label_to_eng = {v: k for k, v in species_display.items()}
-        selected_species = [label_to_eng[label] for label in selected_labels]
+    # แปลง label → English key
+    label_to_eng = {v: k for k, v in species_display.items()}
+    selected_species = [label_to_eng[label] for label in selected_labels]
 
-        # ✅ FETCH BUTTON (CORRECT LOCATION)
-        fetch_clicked = st.button(
-            T["fetch"],
-            use_container_width=True
-        )
+    _, col_fetch, _ = st.columns([1, 2, 1])
+    with col_fetch:
+        fetch_clicked = st.button(T["fetch"])
 
-    # ===== RIGHT: info panel =====
-    with info_col:
-        st.metric(T["available"], len(species_accessions))
-        st.write("")
-        st.write(f"{T['selected']} {len(selected_species)}")
+with info_col:
+    st.metric(T["available"], len(species_accessions))
+    st.write("")  # spacer
+    st.write(f"{T['selected']} {len(selected_species)}")
 
 
 # ========== CACHING FOR FETCH ==========
