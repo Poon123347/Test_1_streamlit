@@ -13,6 +13,16 @@ from Bio.SeqRecord import SeqRecord
 from copy import deepcopy
 from matplotlib.collections import LineCollection
 plt.rcParams["toolbar"] = "None"
+from matplotlib import font_manager, rcParams
+
+thai_font_path = "/usr/share/fonts/truetype/noto/NotoSansThai-Regular.ttf"
+
+try:
+    font_prop = font_manager.FontProperties(fname=thai_font_path)
+    rcParams["font.family"] = font_prop.get_name()
+except:
+    rcParams["font.family"] = "DejaVu Sans"
+
 
 # ========== PAGE CONFIG ==========
 st.set_page_config(
@@ -939,9 +949,18 @@ with tab_tree:
             for clade in tree.find_clades():
                 if clade.branch_length:
                     clade.branch_length /= max_len
-        fig = plt.figure(figsize=(14, 6) , facecolor=THEME["TREE_BORDER_BG"])
+        is_mobile = st.session_state.get("is_mobile", False)
+
+        fig_width = 6 if is_mobile else 14
+        fig_height = 4.5 if is_mobile else 6
+        
+        fig = plt.figure(
+            figsize=(fig_width, fig_height),
+            facecolor=THEME["TREE_BORDER_BG"]
+        )
         ax = fig.add_subplot(111)
         ax.set_facecolor(THEME["PANEL_BG"])
+
         
         Phylo.draw(
             tree,
@@ -949,10 +968,21 @@ with tab_tree:
             do_show=False,
             show_confidence=False,
             label_func=lambda x: str(x.name) if x.name else "")
+
+        # ===== TREE BRANCH COLOR =====
+        BRANCH_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
+        
+        for collection in ax.collections:
+            if isinstance(collection, LineCollection):
+                collection.set_color(BRANCH_COLOR)
+                collection.set_linewidth(2.2)
+
         
         TEXT_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
         
-        ax.margins(x=0.05, y=0.2)
+        ax.margins(x=0.08 if is_mobile else 0.05,
+           y=0.25 if is_mobile else 0.2)
+
 
         # ===== (5) AUTO-SCALE TEXT =====
         n = len(tree.get_terminals())
@@ -972,8 +1002,7 @@ with tab_tree:
         # text style
         for text in ax.texts:
             text.set_color(TEXT_COLOR)
-
-        BRANCH_COLOR = "#CBD5E1" if st.session_state.theme_mode == "Dark" else "#000000"
+            
         for collection in ax.collections:
             if isinstance(collection, LineCollection):
                 collection.set_color(BRANCH_COLOR)
@@ -998,8 +1027,8 @@ with tab_tree:
 # RESULTS TAB 
 # ===============================
 with tab_results:
-    st.markdown(f"## {T['identity']}")   # 👈 หัวข้อใหญ่ขึ้น
-    st.markdown("---")                   # 👈 เส้นแบ่ง
+    st.markdown(f"## {T['identity']}")   
+    st.markdown("---")
 
     df = st.session_state.get("identity_df")
     if df is not None:
