@@ -14,20 +14,14 @@ from copy import deepcopy
 from matplotlib.collections import LineCollection
 plt.rcParams["toolbar"] = "None"
 from matplotlib import font_manager, rcParams
-import re
 
 thai_font_path = "/usr/share/fonts/truetype/noto/NotoSansThai-Regular.ttf"
 
-from matplotlib import font_manager, rcParams
-
 try:
     font_prop = font_manager.FontProperties(fname=thai_font_path)
-    rcParams["font.family"] = "sans-serif"
-    rcParams["font.sans-serif"] = [font_prop.get_name()]
-except Exception as e:
-    rcParams["font.family"] = "sans-serif"
-    rcParams["font.sans-serif"] = ["Noto Sans Thai", "Tahoma", "Arial"]
-
+    rcParams["font.family"] = font_prop.get_name()
+except:
+    rcParams["font.family"] = "DejaVu Sans"
 
 
 # ========== PAGE CONFIG ==========
@@ -37,17 +31,23 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="expanded"
 )
+st.markdown(
+    "<style>header {visibility: hidden;}</style>",
+    unsafe_allow_html=True
+)
 # ===============================
 # THEME STATE
 # ===============================
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
-with st.sidebar:
-    st.markdown("## ⚙️ Settings")
-    st.radio("🎨 Theme", ["Dark", "Light"], key="theme_mode")
-    language = st.selectbox("🌐 Language", ["English", "ภาษาไทย"])
-    st.divider()
+st.radio(
+    "🎨 Theme",
+    ["Dark", "Light"],
+    key="theme_mode",
+    horizontal=True
+)
+
 
 DARK = {
     "BG": "#0d1117",
@@ -114,12 +114,31 @@ section[data-testid="stSidebar"] {{
 }}
 
 /* ================== BUTTONS ================== */
-.stButton button,
+.stButton {{
+    display: inline-block !important;
+}}
+
+.stButton button {{
+    background-color: var(--btn-bg) !important;
+    color: var(--btn-text) !important;
+    border-radius: 10px !important;
+    padding: 0.45rem 1.1rem !important;
+    min-width: 120px;
+    height: 40px;
+    border: none !important;
+}}
+
+.stDownloadButton {{
+    display: inline-block !important;
+}}
+
 .stDownloadButton button {{
     background-color: var(--btn-bg) !important;
     color: var(--btn-text) !important;
     border-radius: 12px !important;
     padding: 0.45rem 1.2rem !important;
+    min-width: 240px;
+    height: 42px;
     border: none !important;
 }}
 
@@ -127,12 +146,24 @@ section[data-testid="stSidebar"] {{
     fill: var(--btn-text) !important;
 }}
 
+div[data-baseweb="button"] {{
+    background: transparent !important;
+    box-shadow: none !important;
+}}
+
 /* ================== EXPANDERS ================== */
 div[data-testid="stExpander"] summary {{
     background-color: var(--panel-bg) !important;
+    color: var(--text) !important;
     border: 1px solid var(--border) !important;
     border-radius: 12px !important;
     padding: 12px !important;
+}}
+
+div[data-testid="stExpander"] summary span,
+div[data-testid="stExpander"] summary svg {{
+    color: var(--text) !important;
+    fill: var(--text) !important;
 }}
 
 div[data-testid="stExpander"] div[role="region"] {{
@@ -149,35 +180,6 @@ div[data-testid="stDataFrame"] {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
     border-radius: 12px !important;
-}}
-
-/* ================== DATAFRAME FIX (IMPORTANT) ================== */
-
-/* full width */
-[data-testid="stDataFrame"] {{
-    width: 100% !important;
-}}
-
-/* header wrap */
-[data-testid="stDataFrame"] th {{
-    white-space: normal !important;
-    word-break: break-word !important;
-    text-align: center !important;
-    font-size: 14px !important;
-    line-height: 1.3 !important;
-}}
-
-/* cell wrap */
-[data-testid="stDataFrame"] td {{
-    white-space: normal !important;
-    word-break: break-word !important;
-    text-align: center !important;
-    font-size: 14px !important;
-}}
-
-/* index column */
-[data-testid="stDataFrame"] th:first-child {{
-    min-width: 140px !important;
 }}
 
 /* ================== CODE BLOCKS ================== */
@@ -220,15 +222,23 @@ svg tspan {{
     fill: var(--text) !important;
 }}
 
-/* ================== DESKTOP ONLY ================== */
+/* =====================================================
+   DESKTOP ONLY: REMOVE STREAMLIT CHROME
+   ⚠️ DO NOT APPLY TO MOBILE
+===================================================== */
 @media (min-width: 768px) {{
+
     header {{
         visibility: hidden !important;
     }}
 
-    div[data-testid="stToolbar"],
-    div[data-testid="stElementToolbar"],
-    button[title="View fullscreen"] {{
+    div[data-testid="stToolbar"] {{
+        display: none !important;
+    }}
+
+    button[title="View fullscreen"],
+    button[data-testid="fullscreenButton"],
+    div[data-testid="stElementToolbar"] {{
         display: none !important;
     }}
 }}
@@ -692,12 +702,20 @@ DNA และ RNA ที่ไม่เข้ารหัส
 
 # ========== SIDEBAR ==========
 # ===============================
+# LANGUAGE SELECTOR (SIDEBAR)
+# ===============================
+language = st.selectbox(
+    "🌐 Language / ภาษา",
+    ["English", "ภาษาไทย"],
+    index=0
+)
+
 
 T = LANGS[language]
 
 if language == "ภาษาไทย":
     species_display = {
-        eng: SPECIES_TH.get(eng, eng)
+        eng: f"{SPECIES_TH.get(eng, eng)} ({eng})"
         for eng in species_accessions
     }
 else:
@@ -805,11 +823,6 @@ def build_fasta_text(seq_dict):
     for name, seq in seq_dict.items():
         s += f">{name}\n{seq}\n"
     return s
-
-def clean_label(x):
-    if x.name:
-        return re.sub(r"\s*\([^)]*\)", "", x.name)
-    return ""
 
 # ========== PROCESS: FETCH ND5 ==========
 if fetch_clicked:
@@ -926,77 +939,79 @@ with tab_tree:
     if tree is None:
         st.info(T["no_tree"])
     else:
-        # ===== NORMALIZE BRANCH LENGTH =====
         lengths = [
-            clade.branch_length
-            for clade in tree.find_clades()
-            if clade.branch_length
-        ]
+        clade.branch_length
+        for clade in tree.find_clades()
+        if clade.branch_length]
 
         if lengths:
             max_len = max(lengths)
             for clade in tree.find_clades():
                 if clade.branch_length:
                     clade.branch_length /= max_len
+        is_mobile = st.session_state.get("is_mobile", False)
 
-        # ===== FIGURE (RESPONSIVE SAFE) =====
+        fig_width = 6 if is_mobile else 14
+        fig_height = 4.5 if is_mobile else 6
+        
         fig = plt.figure(
-            figsize=(10, 5),  # ขนาดกลาง ใช้ได้ทั้ง mobile + desktop
+            figsize=(fig_width, fig_height),
             facecolor=THEME["TREE_BORDER_BG"]
         )
         ax = fig.add_subplot(111)
         ax.set_facecolor(THEME["PANEL_BG"])
 
+        
         Phylo.draw(
             tree,
             axes=ax,
             do_show=False,
             show_confidence=False,
-            label_func=clean_label
-        )
+            label_func=lambda x: str(x.name) if x.name else "")
 
+        # ===== TREE BRANCH COLOR =====
+        BRANCH_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
+        
+        for collection in ax.collections:
+            if isinstance(collection, LineCollection):
+                collection.set_color(BRANCH_COLOR)
+                collection.set_linewidth(2.2)
 
-        # ===== COLORS =====
+        
         TEXT_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
-        BRANCH_COLOR = "#CBD5E1" if st.session_state.theme_mode == "Dark" else "#000000"
+        
+        ax.margins(x=0.08 if is_mobile else 0.05,
+           y=0.25 if is_mobile else 0.2)
 
-        # ===== AUTO SCALE TEXT =====
+
+        # ===== (5) AUTO-SCALE TEXT =====
         n = len(tree.get_terminals())
-        font_size = max(8, 14 - n)
+        font_size = max(9, 16 - n)
 
         for text in ax.texts:
             text.set_fontsize(font_size)
-            text.set_color(TEXT_COLOR)
 
-        # ===== BRANCH STYLE =====
+
+        # remove ticks
+        ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
+
+        # remove frame
+        for spine in ax.spines.values():
+            spine.set_visible(False)
+
+        # text style
+        for text in ax.texts:
+            text.set_color(TEXT_COLOR)
+            
         for collection in ax.collections:
             if isinstance(collection, LineCollection):
                 collection.set_color(BRANCH_COLOR)
                 collection.set_linewidth(2.2)
                 collection.set_alpha(1.0)
-
-        # ===== CLEAN AXIS =====
-        ax.margins(x=0.06, y=0.22)
-        ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
-
-        for spine in ax.spines.values():
-            spine.set_visible(False)
-
         fig.tight_layout()
-
-        # ✅ สำคัญ: ให้ Streamlit จัดขนาดเอง (มือถือไม่พัง)
-        st.pyplot(fig, use_container_width=True)
-
-        # ===== DOWNLOAD =====
+        st.pyplot(fig, use_container_width=False)
         buf = BytesIO()
-        fig.savefig(
-            buf,
-            format="png",
-            dpi=300,
-            bbox_inches="tight",
-            facecolor=fig.get_facecolor()
-        )
-
+        fig.savefig(buf, format="png", dpi=300, bbox_inches="tight",facecolor=fig.get_facecolor())
         _, c, _ = st.columns([1, 2, 1])
         with c:
             st.download_button(
@@ -1005,6 +1020,8 @@ with tab_tree:
                 file_name="nd5_phylogenetic_tree.png",
                 mime="image/png"
             )
+            
+
 
 # ===============================
 # RESULTS TAB 
