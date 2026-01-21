@@ -15,20 +15,16 @@ from matplotlib.collections import LineCollection
 plt.rcParams["toolbar"] = "None"
 from matplotlib import font_manager, rcParams
 import re
-
-thai_font_path = "/usr/share/fonts/truetype/noto/NotoSansThai-Regular.ttf"
-
 from matplotlib import font_manager, rcParams
+import os
 
-try:
+thai_font_path = "fonts/THSarabunNew.ttf"  # หรือ path จริง
+
+if os.path.exists(thai_font_path):
     font_prop = font_manager.FontProperties(fname=thai_font_path)
+    rcParams["font.family"] = font_prop.get_name()
+else:
     rcParams["font.family"] = "sans-serif"
-    rcParams["font.sans-serif"] = [font_prop.get_name()]
-except Exception as e:
-    rcParams["font.family"] = "sans-serif"
-    rcParams["font.sans-serif"] = ["Noto Sans Thai", "Tahoma", "Arial"]
-
-
 
 # ========== PAGE CONFIG ==========
 st.set_page_config(
@@ -222,16 +218,19 @@ svg tspan {{
 
 /* ================== DESKTOP ONLY ================== */
 @media (min-width: 768px) {{
-    header {{
-        visibility: hidden !important;
-    }}
 
+    /* ซ่อน toolbar อย่างเดียว */
     div[data-testid="stToolbar"],
-    div[data-testid="stElementToolbar"],
-    button[title="View fullscreen"] {{
+    div[data-testid="stElementToolbar"] {{
         display: none !important;
     }}
+
+    /* ❌ อย่าซ่อน header */
+    header {{
+        visibility: visible !important;
+    }}
 }}
+
 
 </style>
 """,
