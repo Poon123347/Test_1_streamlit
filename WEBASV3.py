@@ -42,11 +42,11 @@ st.set_page_config(
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
-with st.sidebar:
-    st.markdown("## ⚙️ Settings")
+with st.container():
+    st.markdown("### ⚙️ Settings")
     st.radio("🎨 Theme", ["Dark", "Light"], key="theme_mode")
     language = st.selectbox("🌐 Language", ["English", "ภาษาไทย"])
-    st.divider()
+
 
 DARK = {
     "BG": "#0d1117",
@@ -232,14 +232,6 @@ svg tspan {{
     header {{
         visibility: visible !important;
     }}
-}}
-    /* FORCE SIDEBAR */
-section[data-testid="stSidebar"] {{
-    display: block !important;
-    visibility: visible !important;
-    min-width: 280px !important;
-}}
-
 /* DESKTOP ONLY */
 @media (min-width: 768px) {{
 
