@@ -15,16 +15,19 @@ from matplotlib.collections import LineCollection
 plt.rcParams["toolbar"] = "None"
 from matplotlib import font_manager, rcParams
 import re
-from matplotlib import font_manager, rcParams
 import os
 
-thai_font_path = "fonts/THSarabunNew.ttf"  # หรือ path จริง
 
-if os.path.exists(thai_font_path):
-    font_prop = font_manager.FontProperties(fname=thai_font_path)
-    rcParams["font.family"] = font_prop.get_name()
-else:
-    rcParams["font.family"] = "sans-serif"
+FONT_PATH = os.path.abspath("fonts/NotoSansThai-Regular.ttf")
+
+if not os.path.exists(FONT_PATH):
+    raise FileNotFoundError(f"Font not found: {FONT_PATH}")
+
+font_prop = font_manager.FontProperties(fname=FONT_PATH)
+
+# ตั้งค่าทั้งระบบ
+rcParams["font.family"] = font_prop.get_name()
+rcParams["axes.unicode_minus"] = False
 
 # ========== PAGE CONFIG ==========
 st.set_page_config(
@@ -230,6 +233,26 @@ svg tspan {{
         visibility: visible !important;
     }}
 }}
+    /* FORCE SIDEBAR */
+section[data-testid="stSidebar"] {{
+    display: block !important;
+    visibility: visible !important;
+    min-width: 280px !important;
+}}
+
+/* DESKTOP ONLY */
+@media (min-width: 768px) {{
+
+    div[data-testid="stToolbar"],
+    div[data-testid="stElementToolbar"] {{
+        display: none !important;
+    }}
+
+    header {{
+        visibility: visible !important;
+    }}
+}}
+
 
 
 </style>
@@ -951,21 +974,29 @@ with tab_tree:
             axes=ax,
             do_show=False,
             show_confidence=False,
-            label_func=clean_label
+            label_func=lambda x: x.name if x.name else ""
         )
-
-
         # ===== COLORS =====
+        
         TEXT_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
         BRANCH_COLOR = "#CBD5E1" if st.session_state.theme_mode == "Dark" else "#000000"
-
+        for text in ax.texts:
+            text.set_fontproperties(font_prop)
+            text.set_color(TEXT_COLOR)
         # ===== AUTO SCALE TEXT =====
         n = len(tree.get_terminals())
         font_size = max(8, 14 - n)
 
+        thai_font = None
+        if os.path.exists(FONT_PATH):
+            thai_font = font_manager.FontProperties(fname=FONT_PATH)
+
         for text in ax.texts:
             text.set_fontsize(font_size)
             text.set_color(TEXT_COLOR)
+            if thai_font:
+                text.set_fontproperties(thai_font)
+                text.set_fontfamily("sans-serif")
 
         # ===== BRANCH STYLE =====
         for collection in ax.collections:
