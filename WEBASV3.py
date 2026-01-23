@@ -34,7 +34,7 @@ st.set_page_config(
     page_title="ND5 Phylogenetic Explorer",
     page_icon="🧬",
     layout="centered",
-    initial_sidebar_state="expanded"
+    initial_sidebar_state="collapsed"  # 👈 IMPORTANT
 )
 # ===============================
 # THEME STATE
