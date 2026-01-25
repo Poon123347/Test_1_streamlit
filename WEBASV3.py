@@ -23,9 +23,9 @@ FONT_PATH = os.path.abspath("fonts/NotoSansThai-Regular.ttf")
 if not os.path.exists(FONT_PATH):
     raise FileNotFoundError(f"Font not found: {FONT_PATH}")
 
+font_manager.fontManager.addfont(FONT_PATH)
 font_prop = font_manager.FontProperties(fname=FONT_PATH)
 
-# ตั้งค่าทั้งระบบ
 rcParams["font.family"] = font_prop.get_name()
 rcParams["axes.unicode_minus"] = False
 
@@ -42,11 +42,9 @@ st.set_page_config(
 if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
-with st.container():
-    st.markdown("### ⚙️ Settings")
+with st.expander("⚙️ Settings", expanded=False):
     st.radio("🎨 Theme", ["Dark", "Light"], key="theme_mode")
     language = st.selectbox("🌐 Language", ["English", "ภาษาไทย"])
-
 
 DARK = {
     "BG": "#0d1117",
@@ -99,6 +97,7 @@ f"""
 .stApp {{
     background-color: var(--bg) !important;
     color: var(--text) !important;
+    padding-top: 0 !important;
 }}
 
 html, body, div, span, p, label,
@@ -126,20 +125,66 @@ section[data-testid="stSidebar"] {{
     fill: var(--btn-text) !important;
 }}
 
-/* ================== EXPANDERS ================== */
-div[data-testid="stExpander"] summary {{
+/* ================== EXPANDER – USE DEFAULT ARROW ================== */
+
+/* Styling for expander header */
+div[data-testid="stExpander"] > details > summary {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
     border-radius: 12px !important;
     padding: 12px !important;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
 }}
 
-div[data-testid="stExpander"] div[role="region"] {{
+/* Ensure browser native arrow is visible */
+div[data-testid="stExpander"] > details > summary::-webkit-details-marker {{
+    display: list-item !important;
+}}
+div[data-testid="stExpander"] > details > summary::marker {{
+    display: list-item !important;
+}}
+
+/* Expander body content */
+div[data-testid="stExpander"] > details > div[role="region"] {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
     border-top: none !important;
     border-radius: 0 0 12px 12px !important;
     padding: 16px !important;
+}}
+
+/* ================== BLACK SELECT TEXT IN LIGHT MODE ================== */
+
+/* Light mode: make selected values and placeholder black */
+@media (prefers-color-scheme: light) {{
+
+    /* For st.selectbox and st.multiselect containers */
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] > div input,
+    div[data-baseweb="select"] span[id] {{
+        color: #000000 !important;
+    }}
+
+    /* Placeholder text in BaseWeb */
+    div[data-baseweb="select"] div[data-testid="select-container"] {{
+        color: #000000 !important;
+    }}
+}}
+
+/* Dark mode: use theme text color */
+@media (prefers-color-scheme: dark) {{
+
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] > div input,
+    div[data-baseweb="select"] span[id] {{
+        color: var(--text) !important;
+    }}
+
+    div[data-baseweb="select"] div[data-testid="select-container"] {{
+        color: var(--text) !important;
+    }}
 }}
 
 /* ================== PANELS ================== */
@@ -150,23 +195,12 @@ div[data-testid="stDataFrame"] {{
     border-radius: 12px !important;
 }}
 
-/* ================== DATAFRAME FIX (IMPORTANT) ================== */
-
-/* full width */
+/* ================== DATAFRAME FIX ================== */
 [data-testid="stDataFrame"] {{
     width: 100% !important;
 }}
 
-/* header wrap */
-[data-testid="stDataFrame"] th {{
-    white-space: normal !important;
-    word-break: break-word !important;
-    text-align: center !important;
-    font-size: 14px !important;
-    line-height: 1.3 !important;
-}}
-
-/* cell wrap */
+[data-testid="stDataFrame"] th,
 [data-testid="stDataFrame"] td {{
     white-space: normal !important;
     word-break: break-word !important;
@@ -174,7 +208,6 @@ div[data-testid="stDataFrame"] {{
     font-size: 14px !important;
 }}
 
-/* index column */
 [data-testid="stDataFrame"] th:first-child {{
     min-width: 140px !important;
 }}
@@ -202,6 +235,28 @@ li[role="option"] {{
     color: var(--text) !important;
 }}
 
+/* ================== SELECT ARROW FIX ================== */
+
+/* Light mode: make dropdown arrow visible (black) */
+@media (prefers-color-scheme: light) {{
+
+    /* BaseWeb select arrow */
+    div[data-baseweb="select"] svg {{
+        fill: #000000 !important;
+        color: #000000 !important;
+    }}
+}}
+
+/* Dark mode: follow theme text color */
+@media (prefers-color-scheme: dark) {{
+
+    div[data-baseweb="select"] svg {{
+        fill: var(--text) !important;
+        color: var(--text) !important;
+    }}
+}}
+
+
 /* ================== METRICS ================== */
 div[data-testid="stMetricLabel"],
 div[data-testid="stMetricValue"] {{
@@ -221,20 +276,6 @@ svg tspan {{
 
 /* ================== DESKTOP ONLY ================== */
 @media (min-width: 768px) {{
-
-    /* ซ่อน toolbar อย่างเดียว */
-    div[data-testid="stToolbar"],
-    div[data-testid="stElementToolbar"] {{
-        display: none !important;
-    }}
-
-    /* ❌ อย่าซ่อน header */
-    header {{
-        visibility: visible !important;
-    }}
-/* DESKTOP ONLY */
-@media (min-width: 768px) {{
-
     div[data-testid="stToolbar"],
     div[data-testid="stElementToolbar"] {{
         display: none !important;
@@ -245,15 +286,33 @@ svg tspan {{
     }}
 }}
 
+/* ================== HIDE STREAMLIT HEADER ================== */
+header[data-testid="stHeader"] {{
+    display: none !important;
+}}
+/* ================== Fading BG ================== */
+@media (prefers-reduced-motion: no-preference) {{
+    * {{
+        transition-duration: 0.25s !important;
+    }}
+}}
+/* ================== SMOOTH TEXT TRANSITIONS ================== */
+p, span, label,
+h1, h2, h3, h4, h5, h6,
+li, a, strong, em,
+code, pre,
+th, td,
+svg text, svg tspan {{
+    transition:
+        color 0.25s ease,
+        fill 0.25s ease;
+}}
 
 
 </style>
 """,
 unsafe_allow_html=True
 )
-
-
-
 
 # ========== NCBI CONFIG ==========
 Entrez.email = "poonthakorn@gmail.com"
@@ -373,7 +432,9 @@ LANGS = {
         "missing_nd5": "⚠️ สายพันธุ์ต่อไปนี้ไม่มีข้อมูล ND5 ในฐานข้อมูล NCBI:",
 
         # ===== Expanders =====
-        "methods_expander": "🔬 กลไกระดับโมเลกุล ขั้นตอน และวัตถุประสงค์"
+        "methods_expander": "🔬 กลไกระดับโมเลกุล ขั้นตอน และวัตถุประสงค์",
+
+        "species" : "สปีชีส์"
     },
 
     "English": {
@@ -410,7 +471,9 @@ LANGS = {
         "missing_nd5": "⚠️ The following species do not have ND5 data in NCBI:",
 
         # ===== Expanders =====
-        "methods_expander": "🔬 Molecular mechanisms, pipeline and objectives"
+        "methods_expander": "🔬 Molecular mechanisms, pipeline and objectives",
+
+        "species" : "species"
     }
 }
 
@@ -419,141 +482,112 @@ LANGS = {
 # ===============================
 METHODS_TEXT = {
     "English": """
-🔬 Molecular Mechanisms of DNA (Comprehensive Overview)
+Molecular Mechanisms of DNA (In-depth Overview)
 
 DNA Packaging and Chromatin Structure  
-Eukaryotic DNA is packaged into chromatin, whose fundamental unit is the **nucleosome**.
+Eukaryotic DNA is packaged into chromatin, whose fundamental structural unit is the nucleosome.
 Each nucleosome consists of approximately 146–147 base pairs of DNA wrapped around an octamer of histone proteins.
-Chromatin exists in two major forms: **euchromatin**, which is loosely packed and transcriptionally active,
-and **heterochromatin**, which is densely packed and transcriptionally repressive.
+Chromatin exists in two major states: euchromatin, which is loosely packed and transcriptionally active,
+and heterochromatin, which is tightly packed and transcriptionally repressive.
 
 Histone Modifications  
-Histone tails undergo post-translational modifications such as **acetylation** and **methylation**,
-which influence chromatin accessibility and gene expression.
-For example, histone acetylation (e.g., **H3K27ac**) is generally associated with transcriptionally active regions,
-while histone methylation can either activate or repress transcription depending on the residue and context
-(e.g., H3K4, H3K9, H3K27).
+Histone protein tails can undergo chemical modifications such as acetylation and methylation,
+which affect chromatin structure and regulate gene expression.
+For example, histone acetylation at H3K27ac is commonly associated with actively transcribed regions,
+whereas histone methylation can either activate or repress transcription depending on the modified residue and context.
 
 DNA Methylation (CpG Islands)  
-DNA methylation commonly occurs at cytosine residues in CpG dinucleotides.
-Hypermethylation of CpG islands in promoter regions can inhibit transcription factor binding
-and lead to gene silencing, playing an important role in epigenetic regulation.
+DNA methylation typically occurs at cytosine residues within CpG dinucleotides,
+particularly in CpG islands near gene promoter regions.
+Methylation in these regions can inhibit transcription factor binding
+and lead to gene silencing, serving as an important epigenetic regulatory mechanism.
 
 Chromatin Remodeling  
-ATP-dependent chromatin remodeling complexes reposition or remove nucleosomes,
-thereby regulating the accessibility of DNA to transcriptional machinery.
+Chromatin remodeling complexes use ATP to reposition or remove nucleosomes,
+thereby regulating DNA accessibility to transcriptional machinery.
 
 Transcription and Cis-Regulatory Elements  
-Transcription initiates at promoter regions with the binding of RNA polymerase II
-and transcription factors. **Enhancers** increase transcriptional activity,
-whereas **silencers** suppress gene expression.
+Transcription begins at promoter regions through the binding of RNA polymerase II
+and transcription factors.
+Enhancers increase transcriptional activity, whereas silencers suppress gene expression.
 
 Epigenetics  
-Epigenetics refers to heritable changes in gene expression that do not involve alterations
-in the DNA sequence. DNA methylation and histone modifications are major epigenetic mechanisms
-that define cell-type-specific gene expression patterns.
+Epigenetics refers to heritable changes in gene expression that do not involve
+alterations in the DNA sequence.
+Major epigenetic mechanisms include DNA methylation and histone modifications,
+which define cell-type-specific gene expression patterns.
 
 Non-coding DNA and RNA  
 Although most of the human genome does not encode proteins,
-non-coding elements such as **microRNAs (miRNAs)** and **long non-coding RNAs (lncRNAs)**
-play crucial roles in post-transcriptional gene regulation by inhibiting translation
-or promoting mRNA degradation.
+non-coding elements such as microRNAs and long non-coding RNAs
+play essential roles in post-transcriptional gene regulation.
 
 ---
 
 Human DNA Analysis Using Bioinformatics
 
-### Definition of Bioinformatics  
-**Bioinformatics** is the application of computational tools and algorithms
+Definition of Bioinformatics  
+Bioinformatics is the application of computational tools and algorithms
 to analyze biological sequence data, enabling the study of genetic variation,
 gene function, evolution, and disease-associated mutations.
 
 ---
 
-Objectives of the Study
-1. To study human DNA in order to understand human genetic variation and species relationships.  
-2. To construct **phylogenetic trees** to investigate evolutionary relationships
-between humans and other species based on DNA sequence differences,
-and to explore functional aspects of DNA in animals.  
-3. To analyze sequence variation in the mitochondrial **ND5 gene**
-and assess its evolutionary and biological significance.
+Objectives  
+1. To study human DNA in order to understand human lineage and genetic relationships.  
+2. To construct phylogenetic trees to examine the relationships between human DNA and genetic variation in animals, and to study the functional roles of DNA.
 
-Expected Benefits
-1. To enhance understanding of human genetic diversity and evolutionary relationships
-through DNA sequence analysis.  
-2. To provide insights into the origin and evolutionary divergence of humans
-and to establish a foundation for further studies in medical and genetic research,
-particularly in mitochondrial-related diseases.
+Expected Benefits  
+1. To enhance understanding of human lineage and relationships through DNA analysis.  
+2. To gain insight into the origin and evolutionary development of humans, and to provide a foundation for further study in medical research.
 
 ---
 
 Bioinformatics Analysis Pipeline
 
 Data Source  
-DNA sequences used in this study are retrieved from the public database
-**NCBI GenBank** using accession numbers for each species.
-All sequences are publicly available and do not contain personal or sensitive information.
+DNA sequences used in this study are obtained from the public database NCBI GenBank
+using accession numbers for each species.
+All data are publicly available and contain no personal or sensitive information.
 
 Data Preparation and Quality Control  
-- Extraction of the **ND5 (MT-ND5)** coding sequence from mitochondrial genomes.  
-- All sequences are standardized to a common length after extraction, 
-    based on the longest ND5 sequence, to ensure accurate alignment and comparison.  
-- Sequences with insufficient length, excessive ambiguous bases (N),
-or internal stop codons are excluded from analysis.
-- The length of the ND5 gene varies slightly among species (e.g., 1,812 bp, 1,815 bp, or 1,821 bp).
-- This variation is caused by evolutionary insertions and deletions (indels), differences in start or stop codon annotation
+- Extraction of the ND5 (MT-ND5) gene from mitochondrial genomes.  
+- ND5 gene length varies slightly among species (for example, 1,812 bp, 1,815 bp, or 1,821 bp).
+- These differences arise from evolutionary insertions and deletions,
+differences in start or stop codon annotation,
 and species-specific mutations accumulated over time.
-
-Such length variation is biologically normal and reflects evolutionary divergence rather than sequencing error.
+- Such variation is biologically normal and reflects evolutionary divergence
+rather than sequencing error.
+- Sequences with excessive ambiguous bases or internal stop codons are excluded.
 
 Multiple Sequence Alignment  
-Multiple sequence alignment (MSA) is performed to align ND5 sequences
-from different species, ensuring homologous positions are compared.
+Multiple sequence alignment is performed to ensure homologous nucleotide positions
+are accurately compared across species.
 
 Evolutionary Distance and Phylogenetic Tree Construction  
-- Pairwise sequence similarity (% identity) and evolutionary distances are calculated.  
-- A **phylogenetic tree** is constructed to visualize evolutionary relationships
-among species based on ND5 sequence variation.
+- Pairwise sequence similarity and evolutionary distances are calculated.  
+- A phylogenetic tree is constructed to visualize evolutionary relationships
+based on ND5 sequence variation.
 
 ---
 
-Biological Function of the ND5 Gene
-The mitochondrial **MT-ND5** gene encodes a subunit of **Complex I**
-(NADH dehydrogenase) in the mitochondrial electron transport chain.
-This complex plays a critical role in oxidative phosphorylation
-and ATP production.
+Biological Function of the ND5 Gene  
+The mitochondrial MT-ND5 gene encodes a subunit of Complex I
+in the mitochondrial electron transport chain,
+which plays a critical role in ATP production.
 
-Why the ND5 Gene Is Used in Evolutionary Studies
-The mitochondrial ND5 gene is commonly used in phylogenetic and evolutionary studies for several reasons.
--First, mitochondrial DNA is maternally inherited and does not undergo recombination, allowing evolutionary 
-changes to accumulate in a relatively predictable manner.
-
--Second, ND5 evolves at a moderate rate, making it suitable for resolving evolutionary relationships 
-among closely related species such as mammals and primates.
-
--Third, ND5 is a protein-coding gene involved in cellular energy production, meaning its sequence is evolutionarily conserved while still allowing informative mutations to occur.
-
-These characteristics make ND5 particularly useful for studying species divergence, 
-evolutionary distance, and phylogenetic relationships.
-
----
-
-Medical Significance
+Medical Significance  
 Mutations in the ND5 gene are associated with mitochondrial disorders
-such as **MELAS** and **Leigh syndrome**, which impair cellular energy production.
-Therefore, ND5 is an important gene for both evolutionary studies
-and medical genetics.
+such as MELAS and Leigh syndrome,
+highlighting its importance in both evolutionary biology and medical genetics.
 
----
-
-Reproducibility and Future Applications
-The analytical workflow and computational steps can be reproduced
-and extended to larger datasets. This approach provides a foundation
-for future research in evolutionary biology, population genetics,
-and biomedical studies.
+Reproducibility and Future Applications  
+The analytical workflow can be reproduced and extended to other datasets,
+providing a foundation for future studies in evolutionary biology,
+population genetics, and biomedical research.
 """,           
     "ภาษาไทย": """
-## 🔬 กลไกระดับโมเลกุลของ DNA (ภาพรวมเชิงลึก)
+##  กลไกระดับโมเลกุลของ DNA (ภาพรวมเชิงลึก)
 
 การจัดบรรจุ DNA และโครมาติน  
 DNA ของยูคาริโอตถูกบรรจุอยู่ในรูปของโครมาติน โดยมีหน่วยพื้นฐานคือ **นิวคลีโอโซม**
@@ -599,7 +633,7 @@ DNA และ RNA ที่ไม่เข้ารหัส
 
 ---
 
-🧬 การวิเคราะห์ดีเอ็นเอของมนุษย์ด้วยชีวสารสนเทศ
+การวิเคราะห์ดีเอ็นเอของมนุษย์ด้วยชีวสารสนเทศ
 
 ความหมายของชีวสารสนเทศ  
 **ชีวสารสนเทศ (Bioinformatics)** คือการประยุกต์ใช้คอมพิวเตอร์
@@ -609,27 +643,21 @@ DNA และ RNA ที่ไม่เข้ารหัส
 
 ---
 
-🎯 วัตถุประสงค์ของการศึกษา
-1. เพื่อศึกษาดีเอ็นเอของมนุษย์และทำความเข้าใจความหลากหลายทางพันธุกรรม
-รวมถึงความสัมพันธ์ระหว่างมนุษย์กับสายพันธุ์อื่น  
-2. เพื่อสร้าง **แผนภูมิวิวัฒนาการ (phylogenetic tree)**
-สำหรับอธิบายความสัมพันธ์เชิงวิวัฒนาการจากความแตกต่างของลำดับดีเอ็นเอ
-และศึกษาหน้าที่ของยีนในสัตว์ชนิดต่าง ๆ  
-3. เพื่อวิเคราะห์ความแปรผันของลำดับยีนไมโตคอนเดรีย **ND5**
-และประเมินความสำคัญทางชีววิทยาและวิวัฒนาการของยีนดังกล่าว
+วัตถุประสงค์ของการศึกษา
+1.ศึกษาดีเอ็นเอของมนุษย์เพื่อให้เข้าใจสายพันธุ์ของมนุษย์ 
+2.สร้างแผนภูมิวิวัฒนาการเพื่อให้เข้าใจลักษณะความสัมพันธ์ของดีเอ็นเอของมนุษย์
+  กับความแตกต่างและศึกษาหน้าที่ของการทำงานของดีเอ็นเอของสัตว์ 
 
 ---
 
-✅ ประโยชน์ที่คาดว่าจะได้รับ
-1. ทำให้เข้าใจความสัมพันธ์และสายวิวัฒนาการของมนุษย์
-ผ่านการวิเคราะห์ข้อมูลลำดับดีเอ็นเอ  
-2. ทำให้ทราบถึงต้นกำเนิดและการพัฒนาการของมนุษย์ในเชิงวิวัฒนาการ
-และสามารถนำความรู้ไปต่อยอดในการศึกษาทางการแพทย์
-โดยเฉพาะโรคที่เกี่ยวข้องกับไมโตคอนเดรีย
+ประโยชน์ที่คาดว่าจะได้รับ
+1.ทำให้รู้สายพันธุ์และความสัมพันธ์ของมนุษย์ผ่านดีเอ็นเอ
+2.สามารถรู้ต้นกำเนิดของมนุษย์และการพัฒนาการมนุษย์ที่ต่าง
+  การออกไปและนำไปศึกษาต่อทางการแพทย์
 
 ---
 
-🛠️ กระบวนการวิเคราะห์ด้วยชีวสารสนเทศ
+กระบวนการวิเคราะห์ด้วยชีวสารสนเทศ
 
 แหล่งที่มาของข้อมูล  
 ลำดับดีเอ็นเอที่ใช้ในการศึกษานี้ถูกดึงมาจากฐานข้อมูลสาธารณะ
@@ -684,7 +712,7 @@ DNA และ RNA ที่ไม่เข้ารหัส
 
 ---
 
-🚨 ความสำคัญทางการแพทย์
+ความสำคัญทางการแพทย์
 การกลายพันธุ์ในยีน ND5 มีความเกี่ยวข้องกับโรคไมโตคอนเดรีย
 เช่น **MELAS** และ **Leigh syndrome**
 ซึ่งส่งผลต่อการสร้างพลังงานของเซลล์
@@ -693,7 +721,7 @@ DNA และ RNA ที่ไม่เข้ารหัส
 
 ---
 
-🔁 ความสามารถในการทำซ้ำและการศึกษาต่อยอด
+ความสามารถในการทำซ้ำและการศึกษาต่อยอด
 กระบวนการวิเคราะห์ที่ใช้ในการศึกษานี้สามารถนำไปทำซ้ำ
 และประยุกต์ใช้กับข้อมูลจากสายพันธุ์อื่นหรือยีนอื่นได้
 ซึ่งเป็นพื้นฐานสำหรับการวิจัยในอนาคต
@@ -825,6 +853,12 @@ def clean_label(x):
         return re.sub(r"\s*\([^)]*\)", "", x.name)
     return ""
 
+def translate_species(name, language):
+    if language == "ภาษาไทย":
+        return SPECIES_TH.get(name, name)
+    return name
+
+
 # ========== PROCESS: FETCH ND5 ==========
 if fetch_clicked:
     if len(selected_species) < 2:
@@ -921,6 +955,109 @@ tab_results, tab_tree, tab_methods = st.tabs([
 ])
 
 # ===============================
+# RESULTS TAB
+# ===============================
+with tab_results:
+    st.subheader(T["results"])
+
+    df = st.session_state.get("identity_df")
+
+    if df is not None:
+
+        # ===== translate row + column labels =====
+        df_display = df.copy()
+
+        df_display.index = [
+            translate_species(i, language) for i in df_display.index
+        ]
+        df_display.columns = [
+            translate_species(c, language) for c in df_display.columns
+        ]
+
+        # ===== insert translated Species header =====
+        df_display.insert(0, T["species"], df_display.index)
+
+        styled_df = (
+            df_display.style
+
+            # ----- number format -----
+            .format("{:.2f}", subset=df_display.columns[1:])
+
+            # ----- gradient (numbers only) -----
+            .background_gradient(
+                cmap="Blues",
+                subset=df_display.columns[1:]
+            )
+
+            # ----- global cells -----
+            .set_properties(
+                **{
+                    "text-align": "center",
+                    "font-weight": "500",
+                    "border": "1px solid #9CA3AF",
+                    "white-space": "nowrap",
+                    "min-width": "120px",
+                }
+            )
+
+            # ----- Species column -----
+            .set_properties(
+                subset=[T["species"]],
+                **{
+                    "text-align": "left",
+                    "font-weight": "600",
+                    "background-color": "#E5E7EB",
+                    "color": "#000000",
+                    "white-space": "nowrap",
+                    "min-width": "220px",
+                }
+            )
+
+            # ----- borders & headers -----
+            .set_table_styles([
+                {
+                    "selector": "th",
+                    "props": [
+                        ("background-color", "#1F2937"),
+                        ("color", "#FFFFFF"),
+                        ("border", "1px solid #6B7280"),
+                        ("font-weight", "700"),
+                        ("text-align", "center"),
+                        ("white-space", "nowrap"),
+                        ("padding", "6px 10px"),
+                    ],
+                },
+                {
+                    "selector": "td",
+                    "props": [
+                        ("border", "1px solid #6B7280"),
+                        ("padding", "6px 10px"),
+                    ],
+                },
+                {
+                    "selector": "table",
+                    "props": [
+                        ("border-collapse", "collapse"),
+                        ("border", "1px solid #6B7280"),
+                    ],
+                },
+            ])
+        )
+
+        st.dataframe(
+            styled_df,
+            width="stretch",
+            hide_index=True
+        )
+
+
+
+    else:
+        st.info(T["no_results"])
+
+
+
+# ===============================
 # METHODS TAB
 # ===============================
 with tab_methods:
@@ -955,7 +1092,7 @@ with tab_tree:
 
         # ===== FIGURE (RESPONSIVE SAFE) =====
         fig = plt.figure(
-            figsize=(10, 5),  # ขนาดกลาง ใช้ได้ทั้ง mobile + desktop
+            figsize=(10, 5),
             facecolor=THEME["TREE_BORDER_BG"]
         )
         ax = fig.add_subplot(111)
@@ -968,14 +1105,14 @@ with tab_tree:
             show_confidence=False,
             label_func=lambda x: x.name if x.name else ""
         )
-        # ===== COLORS =====
-        
+
         TEXT_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
         BRANCH_COLOR = "#CBD5E1" if st.session_state.theme_mode == "Dark" else "#000000"
+
         for text in ax.texts:
             text.set_fontproperties(font_prop)
             text.set_color(TEXT_COLOR)
-        # ===== AUTO SCALE TEXT =====
+
         n = len(tree.get_terminals())
         font_size = max(8, 14 - n)
 
@@ -990,14 +1127,12 @@ with tab_tree:
                 text.set_fontproperties(thai_font)
                 text.set_fontfamily("sans-serif")
 
-        # ===== BRANCH STYLE =====
         for collection in ax.collections:
             if isinstance(collection, LineCollection):
                 collection.set_color(BRANCH_COLOR)
                 collection.set_linewidth(2.2)
                 collection.set_alpha(1.0)
 
-        # ===== CLEAN AXIS =====
         ax.margins(x=0.06, y=0.22)
         ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
 
@@ -1005,11 +1140,8 @@ with tab_tree:
             spine.set_visible(False)
 
         fig.tight_layout()
-
-        # ✅ สำคัญ: ให้ Streamlit จัดขนาดเอง (มือถือไม่พัง)
         st.pyplot(fig, use_container_width=True)
 
-        # ===== DOWNLOAD =====
         buf = BytesIO()
         fig.savefig(
             buf,
@@ -1028,20 +1160,3 @@ with tab_tree:
                 mime="image/png"
             )
 
-# ===============================
-# RESULTS TAB 
-# ===============================
-with tab_results:
-    st.markdown(f"## {T['identity']}")   
-    st.markdown("---")
-
-    df = st.session_state.get("identity_df")
-    if df is not None:
-        st.dataframe(
-            df.style
-            .format("{:.2f}")
-            .background_gradient(cmap="Blues"),
-        width="stretch")
-
-    else:
-        st.info(T["no_results"])
