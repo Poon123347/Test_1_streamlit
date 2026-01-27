@@ -43,8 +43,10 @@ if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
 with st.expander("⚙️ Settings", expanded=False):
-    st.radio("🎨 Theme", ["Dark", "Light"], key="theme_mode")
+    theme_choice = st.radio("🎨 Theme", ["Dark", "Light"], index=0)
     language = st.selectbox("🌐 Language", ["English", "ภาษาไทย"])
+
+st.session_state.theme_mode = theme_choice
 
 DARK = {
     "BG": "#0d1117",
@@ -306,6 +308,31 @@ svg text, svg tspan {{
     transition:
         color 0.25s ease,
         fill 0.25s ease;
+}}
+/* ================== HARD KILL BASEWEB SELECT JUMP ================== */
+
+/* Kill all BaseWeb motion + transform */
+div[data-baseweb="select"],
+div[data-baseweb="select"] * {{
+    transition: none !important;
+    animation: none !important;
+    transform: none !important;
+}}
+
+/* Prevent layout shift on rerender */
+div[data-baseweb="select"] {{
+    will-change: auto !important;
+}}
+
+/* Kill internal popover reposition animation */
+[data-baseweb="popover"] {{
+    transition: none !important;
+    animation: none !important;
+}}
+
+/* Prevent expander content shifting when state updates */
+div[data-testid="stExpander"] > details {{
+    contain: layout paint !important;
 }}
 
 
@@ -812,7 +839,7 @@ def extract_nd5_cached(accession):
         record = SeqIO.read(handle, "genbank")
         handle.close()
 
-        found = False   # 👈 เพิ่มบรรทัดนี้
+        found = False  
 
         for feature in record.features:
             if feature.type == "gene":
@@ -865,7 +892,7 @@ if fetch_clicked:
         st.warning(T["select_species"])
     else:
         nd5_seqs = {}
-        missing_species = []   # 👈 เพิ่ม
+        missing_species = []  
 
         for eng_name in selected_species:
             acc = species_accessions[eng_name]
