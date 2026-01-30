@@ -43,10 +43,23 @@ if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
 with st.expander("⚙️ Settings", expanded=False):
-    theme_choice = st.radio("🎨 Theme", ["Dark", "Light"], index=0)
-    language = st.selectbox("🌐 Language", ["English", "ภาษาไทย"])
+    st.markdown("### 🎛️ Interface")
 
-st.session_state.theme_mode = theme_choice
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.radio(
+            "Theme",
+            ["Dark", "Light"],
+            key="theme_mode"
+        )
+
+    with col2:
+        language = st.selectbox(
+            "Language",
+            ["English", "ภาษาไทย"]
+        )
+
 
 DARK = {
     "BG": "#0d1117",
@@ -59,7 +72,8 @@ DARK = {
     "CODE_TEXT": "#d1d7e0",
     "BTN_BG": "#238636",
     "BTN_TEXT": "#ffffff",
-    "TREE_BORDER_BG" : "#9ca3af"
+    "TREE_BORDER_BG" : "#9ca3af",
+    "TABLE_TEXT" : "#535353"
 }
 
 LIGHT = {
@@ -73,10 +87,14 @@ LIGHT = {
     "CODE_TEXT": "#111827",
     "BTN_BG": "#2563eb",
     "BTN_TEXT": "#ffffff",
-    "TREE_BORDER_BG" : "#d8e6fe"
+    "TREE_BORDER_BG" : "#d8e6fe",
+    "TABLE_TEXT" : "#606060"
 }
 THEME = DARK if st.session_state.theme_mode == "Dark" else LIGHT
 # ---------- THEME STATE (SAFE DEFAULT) ----------
+# HARD layout lock (do NOT remove)
+st.markdown('<div style="height:48px"></div>', unsafe_allow_html=True)
+
 st.markdown(
 f"""
 <style>
@@ -107,10 +125,9 @@ h1, h2, h3, h4, h5, h6 {{
     color: var(--text) !important;
 }}
 
-/* ================== SIDEBAR ================== */
-section[data-testid="stSidebar"] {{
-    background-color: var(--sidebar-bg) !important;
-    border-right: 1px solid var(--border) !important;
+/* Hide Streamlit header */
+header[data-testid="stHeader"] {{
+    display: none !important;
 }}
 
 /* ================== BUTTONS ================== */
@@ -123,32 +140,27 @@ section[data-testid="stSidebar"] {{
     border: none !important;
 }}
 
+/* >>> FORCE BUTTON WIDTH (300%) <<< */
+div[data-testid="stButton"] > button {{
+    width: 300% !important;
+    min-width: 160px !important;
+    box-sizing: border-box !important;
+}}
+
 .stDownloadButton svg {{
     fill: var(--btn-text) !important;
 }}
 
-/* ================== EXPANDER – USE DEFAULT ARROW ================== */
-
-/* Styling for expander header */
+/* ================== EXPANDER ================== */
 div[data-testid="stExpander"] > details > summary {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
     border-radius: 12px !important;
     padding: 12px !important;
-    cursor: pointer;
     display: flex;
     align-items: center;
 }}
 
-/* Ensure browser native arrow is visible */
-div[data-testid="stExpander"] > details > summary::-webkit-details-marker {{
-    display: list-item !important;
-}}
-div[data-testid="stExpander"] > details > summary::marker {{
-    display: list-item !important;
-}}
-
-/* Expander body content */
 div[data-testid="stExpander"] > details > div[role="region"] {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
@@ -157,74 +169,15 @@ div[data-testid="stExpander"] > details > div[role="region"] {{
     padding: 16px !important;
 }}
 
-/* ================== BLACK SELECT TEXT IN LIGHT MODE ================== */
-
-/* Light mode: make selected values and placeholder black */
-@media (prefers-color-scheme: light) {{
-
-    /* For st.selectbox and st.multiselect containers */
-    div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] > div input,
-    div[data-baseweb="select"] span[id] {{
-        color: #000000 !important;
-    }}
-
-    /* Placeholder text in BaseWeb */
-    div[data-baseweb="select"] div[data-testid="select-container"] {{
-        color: #000000 !important;
-    }}
-}}
-
-/* Dark mode: use theme text color */
-@media (prefers-color-scheme: dark) {{
-
-    div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] > div input,
-    div[data-baseweb="select"] span[id] {{
-        color: var(--text) !important;
-    }}
-
-    div[data-baseweb="select"] div[data-testid="select-container"] {{
-        color: var(--text) !important;
-    }}
-}}
-
-/* ================== PANELS ================== */
-div[data-testid="stMetric"],
-div[data-testid="stDataFrame"] {{
-    background-color: var(--panel-bg) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-}}
-
-/* ================== DATAFRAME FIX ================== */
-[data-testid="stDataFrame"] {{
-    width: 100% !important;
-}}
-
-[data-testid="stDataFrame"] th,
-[data-testid="stDataFrame"] td {{
-    white-space: normal !important;
-    word-break: break-word !important;
-    text-align: center !important;
-    font-size: 14px !important;
-}}
-
-[data-testid="stDataFrame"] th:first-child {{
-    min-width: 140px !important;
-}}
-
-/* ================== CODE BLOCKS ================== */
-pre, code {{
-    background-color: var(--code-bg) !important;
-    color: var(--code-text) !important;
-    border-radius: 10px !important;
-}}
-
-/* ================== SELECT ================== */
+/* ================== SELECT / MULTISELECT ================== */
 div[data-baseweb="select"] > div {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
+    min-height: 48px !important;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    padding: 4px 8px !important;
 }}
 
 div[data-baseweb="select"] span,
@@ -232,32 +185,60 @@ div[data-baseweb="select"] input {{
     color: var(--text) !important;
 }}
 
+div[data-baseweb="select"] svg {{
+    fill: var(--text) !important;
+}}
+
 li[role="option"] {{
     background-color: var(--panel-bg) !important;
     color: var(--text) !important;
 }}
 
-/* ================== SELECT ARROW FIX ================== */
-
-/* Light mode: make dropdown arrow visible (black) */
-@media (prefers-color-scheme: light) {{
-
-    /* BaseWeb select arrow */
-    div[data-baseweb="select"] svg {{
-        fill: #000000 !important;
-        color: #000000 !important;
-    }}
+div[data-baseweb="select"],
+div[data-baseweb="select"] * {{
+    transition: none !important;
 }}
 
-/* Dark mode: follow theme text color */
-@media (prefers-color-scheme: dark) {{
+/* ================== DATAFRAME (FINAL – NO CUT) ================== */
 
-    div[data-baseweb="select"] svg {{
-        fill: var(--text) !important;
-        color: var(--text) !important;
-    }}
+/* container */
+div[data-testid="stDataFrame"] {{
+    width: 300% !important;          /* <<< ตามที่ต้องการ */
+    overflow-x: auto !important;
 }}
 
+/* table expands by content */
+div[data-testid="stDataFrame"] table {{
+    width: max-content !important;
+    table-layout: auto !important;
+    border-collapse: separate !important;
+    border-spacing: 0 !important;
+}}
+
+/* cells */
+div[data-testid="stDataFrame"] th,
+div[data-testid="stDataFrame"] td {{
+    padding: 10px 14px !important;
+    font-size: 14px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    min-width: 90px !important;
+}}
+
+/* first column (species) */
+div[data-testid="stDataFrame"] th:first-child,
+div[data-testid="stDataFrame"] td:first-child {{
+    min-width: 220px !important;
+    max-width: 260px !important;
+    text-align: left !important;
+    padding-left: 16px !important;
+    font-weight: 500;
+}}
+
+/* header alignment */
+div[data-testid="stDataFrame"] thead th {{
+    vertical-align: middle !important;
+}}
 
 /* ================== METRICS ================== */
 div[data-testid="stMetricLabel"],
@@ -265,76 +246,29 @@ div[data-testid="stMetricValue"] {{
     color: var(--text) !important;
 }}
 
-/* ================== DIVIDER ================== */
-hr {{
-    border-top: 1px solid var(--border) !important;
+/* ================== CODE ================== */
+pre, code {{
+    background-color: var(--code-bg) !important;
+    color: var(--code-text) !important;
+    border-radius: 10px !important;
 }}
 
-/* ================== SVG (PHYLO TREE) ================== */
+/* ================== SVG ================== */
 svg text,
 svg tspan {{
     fill: var(--text) !important;
 }}
 
-/* ================== DESKTOP ONLY ================== */
-@media (min-width: 768px) {{
-    div[data-testid="stToolbar"],
-    div[data-testid="stElementToolbar"] {{
-        display: none !important;
-    }}
-
-    header {{
-        visibility: visible !important;
-    }}
+/* ================== SAFE OVERFLOW ================== */
+section[data-testid="stSidebar"] div[data-testid="column"] {{
+    overflow: visible !important;
 }}
 
-/* ================== HIDE STREAMLIT HEADER ================== */
-header[data-testid="stHeader"] {{
-    display: none !important;
+div[data-testid="stHorizontalBlock"],
+div[data-testid="stVerticalBlock"] {{
+    height: auto !important;
+    min-height: unset !important;
 }}
-/* ================== Fading BG ================== */
-@media (prefers-reduced-motion: no-preference) {{
-    * {{
-        transition-duration: 0.25s !important;
-    }}
-}}
-/* ================== SMOOTH TEXT TRANSITIONS ================== */
-p, span, label,
-h1, h2, h3, h4, h5, h6,
-li, a, strong, em,
-code, pre,
-th, td,
-svg text, svg tspan {{
-    transition:
-        color 0.25s ease,
-        fill 0.25s ease;
-}}
-/* ================== HARD KILL BASEWEB SELECT JUMP ================== */
-
-/* Kill all BaseWeb motion + transform */
-div[data-baseweb="select"],
-div[data-baseweb="select"] * {{
-    transition: none !important;
-    animation: none !important;
-    transform: none !important;
-}}
-
-/* Prevent layout shift on rerender */
-div[data-baseweb="select"] {{
-    will-change: auto !important;
-}}
-
-/* Kill internal popover reposition animation */
-[data-baseweb="popover"] {{
-    transition: none !important;
-    animation: none !important;
-}}
-
-/* Prevent expander content shifting when state updates */
-div[data-testid="stExpander"] > details {{
-    contain: layout paint !important;
-}}
-
 
 </style>
 """,
@@ -561,12 +495,12 @@ gene function, evolution, and disease-associated mutations.
 ---
 
 Objectives  
-1. To study human DNA in order to understand human lineage and genetic relationships.  
-2. To construct phylogenetic trees to examine the relationships between human DNA and genetic variation in animals, and to study the functional roles of DNA.
+1 To study human DNA in order to understand human lineage and genetic relationships  
+2 To construct phylogenetic trees to examine the relationships between human DNA and animal genetic variation and to study the functional roles of DNA
 
 Expected Benefits  
-1. To enhance understanding of human lineage and relationships through DNA analysis.  
-2. To gain insight into the origin and evolutionary development of humans, and to provide a foundation for further study in medical research.
+1 To enhance understanding of human lineage and relationships through DNA analysis  
+2 To gain insight into the origin and evolutionary development of humans and provide a foundation for further study in medical research
 
 ---
 
@@ -578,23 +512,19 @@ using accession numbers for each species.
 All data are publicly available and contain no personal or sensitive information.
 
 Data Preparation and Quality Control  
-- Extraction of the ND5 (MT-ND5) gene from mitochondrial genomes.  
-- ND5 gene length varies slightly among species (for example, 1,812 bp, 1,815 bp, or 1,821 bp).
-- These differences arise from evolutionary insertions and deletions,
-differences in start or stop codon annotation,
-and species-specific mutations accumulated over time.
-- Such variation is biologically normal and reflects evolutionary divergence
-rather than sequencing error.
-- Sequences with excessive ambiguous bases or internal stop codons are excluded.
+1 Extraction of the ND5 (MT-ND5) gene from mitochondrial genomes  
+2 ND5 gene length varies slightly among species such as 1812 bp 1815 bp or 1821 bp  
+3 These differences arise from evolutionary insertions and deletions differences in start or stop codon annotation and species specific mutations accumulated over time  
+4 Such variation is biologically normal and reflects evolutionary divergence rather than sequencing error  
+5 Sequences with excessive ambiguous bases or internal stop codons are excluded
 
 Multiple Sequence Alignment  
 Multiple sequence alignment is performed to ensure homologous nucleotide positions
 are accurately compared across species.
 
 Evolutionary Distance and Phylogenetic Tree Construction  
-- Pairwise sequence similarity and evolutionary distances are calculated.  
-- A phylogenetic tree is constructed to visualize evolutionary relationships
-based on ND5 sequence variation.
+1 Pairwise sequence similarity and evolutionary distances are calculated  
+2 A phylogenetic tree is constructed to visualize evolutionary relationships based on ND5 sequence variation
 
 ---
 
@@ -612,151 +542,103 @@ Reproducibility and Future Applications
 The analytical workflow can be reproduced and extended to other datasets,
 providing a foundation for future studies in evolutionary biology,
 population genetics, and biomedical research.
-""",           
+""",
+
     "ภาษาไทย": """
-##  กลไกระดับโมเลกุลของ DNA (ภาพรวมเชิงลึก)
+กลไกระดับโมเลกุลของ DNA (ภาพรวมเชิงลึก)
 
 การจัดบรรจุ DNA และโครมาติน  
-DNA ของยูคาริโอตถูกบรรจุอยู่ในรูปของโครมาติน โดยมีหน่วยพื้นฐานคือ **นิวคลีโอโซม**
+DNA ของยูคาริโอตถูกบรรจุอยู่ในรูปของโครมาติน โดยมีหน่วยพื้นฐานคือ นิวคลีโอโซม
 ซึ่งประกอบด้วย DNA ประมาณ 146–147 คู่เบสพันรอบโปรตีนฮิสโตนจำนวน 8 ตัว
-โครมาตินสามารถแบ่งออกเป็น 2 สภาพหลัก ได้แก่  
-**ยูโครมาติน (euchromatin)** ซึ่งมีโครงสร้างหลวมและเอื้อต่อการถอดรหัส
-และ **เฮเทอโรโครมาติน (heterochromatin)** ซึ่งมีโครงสร้างแน่นและยับยั้งการแสดงออกของยีน
+โครมาตินแบ่งออกเป็นสองสภาพหลัก คือ ยูโครมาตินซึ่งมีโครงสร้างหลวมและเอื้อต่อการถอดรหัส
+และเฮเทอโรโครมาตินซึ่งมีโครงสร้างแน่นและยับยั้งการแสดงออกของยีน
 
-การปรับแต่งฮิสโตน (Histone Modifications)  
-หางของโปรตีนฮิสโตนสามารถถูกปรับแต่งทางเคมี เช่น **การอะซิทิล (acetylation)**
-และ **การเมทิล (methylation)** ซึ่งส่งผลต่อระดับการเข้าถึง DNA และการแสดงออกของยีน
-ตัวอย่างเช่น การอะซิทิลของฮิสโตนตำแหน่ง **H3K27ac** มักเกี่ยวข้องกับบริเวณที่มีการถอดรหัสสูง
+การปรับแต่งฮิสโตน  
+หางของโปรตีนฮิสโตนสามารถถูกปรับแต่งทางเคมี เช่น การอะซิทิลและการเมทิล
+ซึ่งส่งผลต่อระดับการเข้าถึง DNA และการแสดงออกของยีน
+ตัวอย่างเช่น การอะซิทิลของฮิสโตนตำแหน่ง H3K27ac มักเกี่ยวข้องกับบริเวณที่มีการถอดรหัสสูง
 ในขณะที่การเมทิลของฮิสโตนบางตำแหน่งอาจกระตุ้นหรือยับยั้งการถอดรหัส ขึ้นอยู่กับบริบทของตำแหน่งนั้น
 
-การเมทิลของ DNA (CpG Islands)  
-การเมทิลของ DNA มักเกิดขึ้นที่ไซโตซีนในตำแหน่ง CpG dinucleotides
-โดยเฉพาะบริเวณ CpG islands ที่อยู่ใกล้โปรโมเตอร์ของยีน
-การเมทิลในบริเวณดังกล่าวสามารถยับยั้งการจับของ transcription factors
-และนำไปสู่การปิดการแสดงออกของยีน ซึ่งเป็นกลไกสำคัญของการควบคุมยีนในระดับเอพิเจเนติกส์
+การเมทิลของ DNA  
+การเมทิลของ DNA มักเกิดขึ้นที่ไซโตซีนในตำแหน่ง CpG
+โดยเฉพาะบริเวณ CpG islands ใกล้โปรโมเตอร์ของยีน
+การเมทิลสามารถยับยั้งการจับของ transcription factors
+และนำไปสู่การปิดการแสดงออกของยีน
 
-การปรับโครงสร้างโครมาติน (Chromatin Remodeling)  
+การปรับโครงสร้างโครมาติน  
 โปรตีนกลุ่ม chromatin remodeling complexes ใช้พลังงานจาก ATP
 ในการเคลื่อนย้ายหรือปรับตำแหน่งของนิวคลีโอโซม
-ทำให้ DNA เปิดหรือปิดต่อเครื่องจักรถอดรหัสได้ตามความเหมาะสม
+ทำให้ DNA เปิดหรือปิดต่อกระบวนการถอดรหัส
 
-การถอดรหัสและองค์ประกอบควบคุมยีน (Cis-Regulatory Elements)  
-กระบวนการถอดรหัสเริ่มต้นที่บริเวณโปรโมเตอร์ โดย RNA polymerase II
-และ transcription factors  
-**Enhancer** มีบทบาทในการเพิ่มระดับการถอดรหัส
-ขณะที่ **silencer** ทำหน้าที่ยับยั้งการแสดงออกของยีน
-
-เอพิเจเนติกส์ (Epigenetics)  
-เอพิเจเนติกส์หมายถึงการเปลี่ยนแปลงการแสดงออกของยีน
-โดยไม่เปลี่ยนแปลงลำดับเบสของ DNA
+เอพิเจเนติกส์  
+เอพิเจเนติกส์คือการเปลี่ยนแปลงการแสดงออกของยีน
+โดยไม่เปลี่ยนลำดับเบสของ DNA
 กลไกหลักได้แก่ DNA methylation และ histone modifications
-ซึ่งช่วยกำหนดรูปแบบการแสดงออกของยีนที่แตกต่างกันในแต่ละชนิดของเซลล์
 
 DNA และ RNA ที่ไม่เข้ารหัส  
-แม้ว่า DNA ส่วนใหญ่ของจีโนมมนุษย์จะไม่เข้ารหัสโปรตีน
-แต่ส่วนที่ไม่เข้ารหัสเหล่านี้ เช่น **microRNA (miRNA)** และ **long non-coding RNA (lncRNA)**
+แม้ DNA ส่วนใหญ่ไม่เข้ารหัสโปรตีน
+แต่ส่วนที่ไม่เข้ารหัส เช่น microRNA และ long non coding RNA
 มีบทบาทสำคัญในการควบคุมการแสดงออกของยีน
-โดยการยับยั้งการแปลโปรตีนหรือกระตุ้นการสลายของ mRNA
 
 ---
 
 การวิเคราะห์ดีเอ็นเอของมนุษย์ด้วยชีวสารสนเทศ
 
 ความหมายของชีวสารสนเทศ  
-**ชีวสารสนเทศ (Bioinformatics)** คือการประยุกต์ใช้คอมพิวเตอร์
-และอัลกอริทึมในการวิเคราะห์ข้อมูลชีวภาพ โดยเฉพาะข้อมูลลำดับ DNA
-เพื่อศึกษาโครงสร้าง ความแตกต่างทางพันธุกรรม วิวัฒนาการ
-และการกลายพันธุ์ที่เกี่ยวข้องกับโรค
+ชีวสารสนเทศคือการประยุกต์ใช้คอมพิวเตอร์และอัลกอริทึม
+เพื่อวิเคราะห์ข้อมูลลำดับ DNA ศึกษาความแตกต่างทางพันธุกรรม
+วิวัฒนาการ และการกลายพันธุ์ที่เกี่ยวข้องกับโรค
 
 ---
 
-วัตถุประสงค์ของการศึกษา
-1.ศึกษาดีเอ็นเอของมนุษย์เพื่อให้เข้าใจสายพันธุ์ของมนุษย์ 
-2.สร้างแผนภูมิวิวัฒนาการเพื่อให้เข้าใจลักษณะความสัมพันธ์ของดีเอ็นเอของมนุษย์
-  กับความแตกต่างและศึกษาหน้าที่ของการทำงานของดีเอ็นเอของสัตว์ 
+วัตถุประสงค์ของการศึกษา  
+1 ศึกษาดีเอ็นเอของมนุษย์เพื่อเข้าใจสายพันธุ์และความสัมพันธ์  
+2 สร้างแผนภูมิต้นไม้วิวัฒนาการเพื่อศึกษาความสัมพันธ์ของดีเอ็นเอและหน้าที่ของยีน
 
----
-
-ประโยชน์ที่คาดว่าจะได้รับ
-1.ทำให้รู้สายพันธุ์และความสัมพันธ์ของมนุษย์ผ่านดีเอ็นเอ
-2.สามารถรู้ต้นกำเนิดของมนุษย์และการพัฒนาการมนุษย์ที่ต่าง
-  การออกไปและนำไปศึกษาต่อทางการแพทย์
+ประโยชน์ที่คาดว่าจะได้รับ  
+1 เข้าใจสายพันธุ์และความสัมพันธ์ของมนุษย์ผ่านดีเอ็นเอ  
+2 เข้าใจต้นกำเนิดและพัฒนาการของมนุษย์และนำไปศึกษาต่อทางการแพทย์
 
 ---
 
 กระบวนการวิเคราะห์ด้วยชีวสารสนเทศ
 
 แหล่งที่มาของข้อมูล  
-ลำดับดีเอ็นเอที่ใช้ในการศึกษานี้ถูกดึงมาจากฐานข้อมูลสาธารณะ
-**NCBI GenBank** โดยใช้หมายเลข accession ของแต่ละสายพันธุ์
-ข้อมูลทั้งหมดเป็นข้อมูลที่เปิดเผยเพื่อการวิจัย
+ข้อมูลลำดับดีเอ็นเอได้มาจากฐานข้อมูลสาธารณะ NCBI GenBank
+โดยใช้หมายเลข accession ของแต่ละสายพันธุ์
 
 การเตรียมข้อมูลและการควบคุมคุณภาพ  
-- ดึงลำดับยีน **ND5 (MT-ND5)** จากจีโนมไมโตคอนเดรีย  
-- ความยาวของยีน ND5 แตกต่างกันเล็กน้อยในแต่ละสปีชีส์ (เช่น 1,812 bp, 1,815 bp หรือ 1,821 bp)
-ความแตกต่างนี้เกิดจากการแทรกและการลบในระหว่างวิวัฒนาการ ความแตกต่างในการกำหนดรหัสเริ่มต้นหรือรหัสหยุด 
-และการกลายพันธุ์เฉพาะสปีชีส์ที่สะสมมาตามกาลเวลา
-ความแตกต่างของความยาวดังกล่าวเป็นเรื่องปกติทางชีววิทยาและสะท้อนถึงความแตกต่างทางวิวัฒนาการมากกว่าข้อผิดพลาดในการจัดลำดับดีเอ็นเอ
-- คัดกรองลำดับที่มีเบสไม่ทราบชนิด (N) จำนวนมาก
-หรือมีสัญญาณการหยุดการแปลภายในกรอบการอ่าน
+1 ดึงลำดับยีน ND5 จากจีโนมไมโตคอนเดรีย  
+2 ความยาวของยีน ND5 แตกต่างกันเล็กน้อยในแต่ละสายพันธุ์  
+3 ความแตกต่างเกิดจากกระบวนการวิวัฒนาการและการกลายพันธุ์  
+4 ความแตกต่างดังกล่าวเป็นเรื่องปกติทางชีววิทยา  
+5 คัดกรองลำดับที่มีเบสไม่ทราบชนิดจำนวนมากหรือมีการหยุดการแปลผิดปกติ
 
-การจัดเรียงหลายลำดับ (Multiple Sequence Alignment)  
-ทำการจัดเรียงลำดับ ND5 ของแต่ละสายพันธุ์
-เพื่อให้ตำแหน่งที่เปรียบเทียบกันเป็นตำแหน่งที่สอดคล้องกันทางชีววิทยา
+การจัดเรียงหลายลำดับ  
+ทำการจัดเรียงลำดับ ND5 เพื่อให้ตำแหน่งที่เปรียบเทียบกันสอดคล้องกัน
 
 การคำนวณระยะทางและการสร้างต้นไม้วิวัฒนาการ  
-- คำนวณค่าความเหมือนของลำดับเบสและระยะทางทางวิวัฒนาการ  
-- สร้าง **แผนภูมิต้นไม้วิวัฒนาการ**
-เพื่อแสดงความสัมพันธ์ของสายพันธุ์ต่าง ๆ จากข้อมูลยีน ND5
-
-
+1 คำนวณค่าความเหมือนและระยะทางเชิงวิวัฒนาการ  
+2 สร้างแผนภูมิต้นไม้วิวัฒนาการจากข้อมูลยีน ND5
 
 ---
 
-หน้าที่ทางชีววิทยาของยีน ND5
-ยีน **MT-ND5** ทำหน้าที่เข้ารหัสหน่วยย่อยของ **Complex I**
+หน้าที่ทางชีววิทยาของยีน ND5  
+ยีน MT ND5 เข้ารหัสหน่วยย่อยของ Complex I
 ในระบบขนส่งอิเล็กตรอนของไมโตคอนเดรีย
-ซึ่งมีบทบาทสำคัญในกระบวนการสร้างพลังงาน (ATP)
-ของเซลล์
+ซึ่งมีบทบาทสำคัญในการสร้างพลังงานของเซลล์
 
-เหตุผลที่เลือกใช้ยีน ND5 ในการศึกษาวิวัฒนาการ
+ความสำคัญทางการแพทย์  
+การกลายพันธุ์ในยีน ND5 เกี่ยวข้องกับโรคไมโตคอนเดรีย
+เช่น MELAS และ Leigh syndrome
 
-ยีนไมโตคอนเดรีย ND5 ถูกนำมาใช้อย่างแพร่หลายในการศึกษาทางวิวัฒนาการและสายสัมพันธ์ของสิ่งมีชีวิต
-เนื่องจากมีคุณสมบัติสำคัญดังต่อไปนี้
-    ประการแรก ดีเอ็นเอของไมโตคอนเดรียถ่ายทอดทางมารดาและไม่มีการเกิด recombination
-ทำให้การเปลี่ยนแปลงของลำดับเบสสะสมไปตามกาลเวลาอย่างเป็นลำดับ
-เหมาะสำหรับการศึกษาความสัมพันธ์เชิงวิวัฒนาการ
-    ประการที่สอง ยีน ND5 มีอัตราการกลายพันธุ์ในระดับปานกลาง
-สามารถแยกความแตกต่างระหว่างสายพันธุ์ที่มีความใกล้ชิดกัน
-เช่น กลุ่มสัตว์เลี้ยงลูกด้วยนมและไพรเมต ได้อย่างมีประสิทธิภาพ
-    ประการที่สาม ND5 เป็นยีนที่เข้ารหัสโปรตีนซึ่งมีบทบาทสำคัญในการสร้างพลังงานของเซลล์
-ทำให้ลำดับยีนมีความคงตัวในระดับหนึ่ง
-แต่ยังคงมีตำแหน่งที่เปลี่ยนแปลงได้เพียงพอสำหรับใช้เป็นข้อมูลเชิงวิวัฒนาการ
-
-ด้วยเหตุผลเหล่านี้ ยีน ND5 จึงเหมาะสมอย่างยิ่งสำหรับการศึกษา
-ความแตกต่างระหว่างสายพันธุ์ ระยะทางเชิงวิวัฒนาการ
-และการสร้างแผนภูมิต้นไม้วิวัฒนาการ (phylogenetic tree)
-
----
-
-ความสำคัญทางการแพทย์
-การกลายพันธุ์ในยีน ND5 มีความเกี่ยวข้องกับโรคไมโตคอนเดรีย
-เช่น **MELAS** และ **Leigh syndrome**
-ซึ่งส่งผลต่อการสร้างพลังงานของเซลล์
-ดังนั้นยีน ND5 จึงมีความสำคัญทั้งในด้านชีววิทยาเชิงวิวัฒนาการ
-และด้านพันธุศาสตร์ทางการแพทย์
-
----
-
-ความสามารถในการทำซ้ำและการศึกษาต่อยอด
-กระบวนการวิเคราะห์ที่ใช้ในการศึกษานี้สามารถนำไปทำซ้ำ
-และประยุกต์ใช้กับข้อมูลจากสายพันธุ์อื่นหรือยีนอื่นได้
-ซึ่งเป็นพื้นฐานสำหรับการวิจัยในอนาคต
-ด้านชีววิทยาวิวัฒนาการ พันธุศาสตร์ประชากร
-และชีวการแพทย์
+ความสามารถในการทำซ้ำและการศึกษาต่อยอด  
+กระบวนการวิเคราะห์สามารถนำไปทำซ้ำ
+และประยุกต์ใช้กับข้อมูลหรือยีนอื่น
+เพื่อการศึกษาวิจัยในอนาคต
 """
-
 }
+
 
 
 # ========== SIDEBAR ==========
@@ -816,7 +698,6 @@ with st.container():
         # ✅ FETCH BUTTON (CORRECT LOCATION)
         fetch_clicked = st.button(
             T["fetch"],
-            use_container_width=True
         )
 
     # ===== RIGHT: info panel =====
@@ -839,7 +720,7 @@ def extract_nd5_cached(accession):
         record = SeqIO.read(handle, "genbank")
         handle.close()
 
-        found = False  
+        found = False   # 👈 เพิ่มบรรทัดนี้
 
         for feature in record.features:
             if feature.type == "gene":
@@ -892,7 +773,7 @@ if fetch_clicked:
         st.warning(T["select_species"])
     else:
         nd5_seqs = {}
-        missing_species = []  
+        missing_species = []   # 👈 เพิ่ม
 
         for eng_name in selected_species:
             acc = species_accessions[eng_name]
@@ -972,9 +853,8 @@ if "nd5_seqs" in st.session_state:
             st.markdown(f"**{name}**")
             st.code(seq[:120] + ("..." if len(seq) > 120 else ""))
 
-
-
 # ========== TABS FOR RESULTS / TREE / METHODS ==========
+
 tab_results, tab_tree, tab_methods = st.tabs([
     T["results"],
     T["tree"],
@@ -1004,6 +884,12 @@ with tab_results:
         # ===== insert translated Species header =====
         df_display.insert(0, T["species"], df_display.index)
 
+        # ===== FIX: numeric text color by theme =====
+        number_text_color = (
+            "#637186" if st.session_state.theme_mode == "Light"
+            else THEME["TABLE_TEXT"]
+        )
+
         styled_df = (
             df_display.style
 
@@ -1016,14 +902,12 @@ with tab_results:
                 subset=df_display.columns[1:]
             )
 
-            # ----- global cells -----
+            # ----- FORCE numeric text color -----
             .set_properties(
+                subset=df_display.columns[1:],
                 **{
-                    "text-align": "center",
+                    "color": number_text_color,
                     "font-weight": "500",
-                    "border": "1px solid #9CA3AF",
-                    "white-space": "nowrap",
-                    "min-width": "120px",
                 }
             )
 
@@ -1033,21 +917,21 @@ with tab_results:
                 **{
                     "text-align": "left",
                     "font-weight": "600",
-                    "background-color": "#E5E7EB",
-                    "color": "#000000",
+                    "background-color": THEME["SIDEBAR_BG"],
+                    "color": THEME["TEXT"],
                     "white-space": "nowrap",
                     "min-width": "220px",
                 }
             )
 
-            # ----- borders & headers -----
+            # ----- headers & borders -----
             .set_table_styles([
                 {
                     "selector": "th",
                     "props": [
-                        ("background-color", "#1F2937"),
-                        ("color", "#FFFFFF"),
-                        ("border", "1px solid #6B7280"),
+                        ("background-color", THEME["PANEL_BG"]),
+                        ("color", THEME["TEXT"]),
+                        ("border", f"1px solid {THEME['BORDER']}"),
                         ("font-weight", "700"),
                         ("text-align", "center"),
                         ("white-space", "nowrap"),
@@ -1057,7 +941,7 @@ with tab_results:
                 {
                     "selector": "td",
                     "props": [
-                        ("border", "1px solid #6B7280"),
+                        ("border", f"1px solid {THEME['BORDER']}"),
                         ("padding", "6px 10px"),
                     ],
                 },
@@ -1065,7 +949,7 @@ with tab_results:
                     "selector": "table",
                     "props": [
                         ("border-collapse", "collapse"),
-                        ("border", "1px solid #6B7280"),
+                        ("border", f"1px solid {THEME['BORDER']}"),
                     ],
                 },
             ])
@@ -1077,11 +961,8 @@ with tab_results:
             hide_index=True
         )
 
-
-
     else:
         st.info(T["no_results"])
-
 
 
 # ===============================
@@ -1167,7 +1048,7 @@ with tab_tree:
             spine.set_visible(False)
 
         fig.tight_layout()
-        st.pyplot(fig, use_container_width=True)
+        st.pyplot(fig, width = "stretch")
 
         buf = BytesIO()
         fig.savefig(
@@ -1186,4 +1067,3 @@ with tab_tree:
                 file_name="nd5_phylogenetic_tree.png",
                 mime="image/png"
             )
-
