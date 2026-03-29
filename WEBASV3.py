@@ -43,8 +43,23 @@ if "theme_mode" not in st.session_state:
     st.session_state.theme_mode = "Dark"
 
 with st.expander("⚙️ Settings", expanded=False):
-    st.radio("🎨 Theme", ["Dark", "Light"], key="theme_mode")
-    language = st.selectbox("🌐 Language", ["English", "ภาษาไทย"])
+    st.markdown("### 🎛️ Interface")
+
+    col1, col2 = st.columns(2)
+
+    with col1:
+        st.radio(
+            "Theme",
+            ["Dark", "Light"],
+            key="theme_mode"
+        )
+
+    with col2:
+        language = st.selectbox(
+            "Language",
+            ["English", "ภาษาไทย"]
+        )
+
 
 DARK = {
     "BG": "#0d1117",
@@ -57,7 +72,8 @@ DARK = {
     "CODE_TEXT": "#d1d7e0",
     "BTN_BG": "#238636",
     "BTN_TEXT": "#ffffff",
-    "TREE_BORDER_BG" : "#9ca3af"
+    "TREE_BORDER_BG" : "#9ca3af",
+    "TABLE_TEXT" : "#535353"
 }
 
 LIGHT = {
@@ -71,7 +87,8 @@ LIGHT = {
     "CODE_TEXT": "#111827",
     "BTN_BG": "#2563eb",
     "BTN_TEXT": "#ffffff",
-    "TREE_BORDER_BG" : "#d8e6fe"
+    "TREE_BORDER_BG" : "#d8e6fe",
+    "TABLE_TEXT" : "#606060"
 }
 THEME = DARK if st.session_state.theme_mode == "Dark" else LIGHT
 # ---------- THEME STATE (SAFE DEFAULT) ----------
@@ -123,6 +140,13 @@ header[data-testid="stHeader"] {{
     border: none !important;
 }}
 
+/* >>> FORCE BUTTON WIDTH (300%) <<< */
+div[data-testid="stButton"] > button {{
+    width: 300% !important;
+    min-width: 160px !important;
+    box-sizing: border-box !important;
+}}
+
 .stDownloadButton svg {{
     fill: var(--btn-text) !important;
 }}
@@ -145,15 +169,74 @@ div[data-testid="stExpander"] > details > div[role="region"] {{
     padding: 16px !important;
 }}
 
-/* ================== SELECT / MULTISELECT ================== */
+/* ================== BLACK SELECT TEXT IN LIGHT MODE ================== */
+
+/* Light mode: make selected values and placeholder black */
+@media (prefers-color-scheme: light) {{
+
+    /* For st.selectbox and st.multiselect containers */
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] > div input,
+    div[data-baseweb="select"] span[id] {{
+        color: #000000 !important;
+    }}
+
+    /* Placeholder text in BaseWeb */
+    div[data-baseweb="select"] div[data-testid="select-container"] {{
+        color: #000000 !important;
+    }}
+}}
+
+/* Dark mode: use theme text color */
+@media (prefers-color-scheme: dark) {{
+
+    div[data-baseweb="select"] > div,
+    div[data-baseweb="select"] > div input,
+    div[data-baseweb="select"] span[id] {{
+        color: var(--text) !important;
+    }}
+
+    div[data-baseweb="select"] div[data-testid="select-container"] {{
+        color: var(--text) !important;
+    }}
+}}
+
+/* ================== PANELS ================== */
+div[data-testid="stMetric"],
+div[data-testid="stDataFrame"] {{
+    background-color: var(--panel-bg) !important;
+    border: 1px solid var(--border) !important;
+    border-radius: 12px !important;
+}}
+
+/* ================== DATAFRAME FIX ================== */
+[data-testid="stDataFrame"] {{
+    width: 100% !important;
+}}
+
+[data-testid="stDataFrame"] th,
+[data-testid="stDataFrame"] td {{
+    white-space: normal !important;
+    word-break: break-word !important;
+    text-align: center !important;
+    font-size: 14px !important;
+}}
+
+[data-testid="stDataFrame"] th:first-child {{
+    min-width: 140px !important;
+}}
+
+/* ================== CODE BLOCKS ================== */
+pre, code {{
+    background-color: var(--code-bg) !important;
+    color: var(--code-text) !important;
+    border-radius: 10px !important;
+}}
+
+/* ================== SELECT ================== */
 div[data-baseweb="select"] > div {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
-    min-height: 48px !important;
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    padding: 4px 8px !important;
 }}
 
 div[data-baseweb="select"] span,
@@ -161,57 +244,30 @@ div[data-baseweb="select"] input {{
     color: var(--text) !important;
 }}
 
-div[data-baseweb="select"] svg {{
-    fill: var(--text) !important;
-}}
-
 li[role="option"] {{
     background-color: var(--panel-bg) !important;
     color: var(--text) !important;
 }}
 
-/* kill select animation */
-div[data-baseweb="select"],
-div[data-baseweb="select"] * {{
-    transition: none !important;
+/* ================== SELECT ARROW FIX ================== */
+
+/* Light mode: make dropdown arrow visible (black) */
+@media (prefers-color-scheme: light) {{
+
+    /* BaseWeb select arrow */
+    div[data-baseweb="select"] svg {{
+        fill: #000000 !important;
+        color: #000000 !important;
+    }}
 }}
 
-/* ================== DATAFRAME (FIXED) ================== */
-div[data-testid="stDataFrame"] {{
-    width: 100% !important;
-    overflow-x: auto !important;
-}}
+/* Dark mode: follow theme text color */
+@media (prefers-color-scheme: dark) {{
 
-/* ตาราง */
-div[data-testid="stDataFrame"] table {{
-    border-collapse: separate !important;
-    border-spacing: 0 !important;
-    table-layout: fixed !important;   /* สำคัญ */
-    width: 100% !important;
-}}
-
-/* หัวตาราง + cell */
-div[data-testid="stDataFrame"] th,
-div[data-testid="stDataFrame"] td {{
-    padding: 10px 14px !important;
-    font-size: 14px !important;
-    text-align: center !important;
-    white-space: nowrap !important;
-}}
-
-/* ===== คอลัมน์ชื่อแถว (ซ้ายสุด) ===== */
-div[data-testid="stDataFrame"] th:first-child,
-div[data-testid="stDataFrame"] td:first-child {{
-    min-width: 220px !important;
-    max-width: 260px !important;
-    text-align: left !important;
-    padding-left: 16px !important;
-    font-weight: 500;
-}}
-
-/* กัน header เบี้ยว */
-div[data-testid="stDataFrame"] thead th {{
-    vertical-align: middle !important;
+    div[data-baseweb="select"] svg {{
+        fill: var(--text) !important;
+        color: var(--text) !important;
+    }}
 }}
 
 
@@ -234,17 +290,38 @@ svg tspan {{
     fill: var(--text) !important;
 }}
 
-/* ================== SAFE OVERFLOW FIX ================== */
-/* จำกัดเฉพาะ column จริง ๆ ไม่ยุ่ง layout engine */
-section[data-testid="stSidebar"] div[data-testid="column"] {{
-    overflow: visible !important;
+/* ================== DESKTOP ONLY ================== */
+@media (min-width: 768px) {{
+    div[data-testid="stToolbar"],
+    div[data-testid="stElementToolbar"] {{
+        display: none !important;
+    }}
+
+    header {{
+        visibility: visible !important;
+    }}
 }}
 
-/* ห้ามบล็อกหลักมี height ตายตัว */
-div[data-testid="stHorizontalBlock"],
-div[data-testid="stVerticalBlock"] {{
-    height: auto !important;
-    min-height: unset !important;
+/* ================== HIDE STREAMLIT HEADER ================== */
+header[data-testid="stHeader"] {{
+    display: none !important;
+}}
+/* ================== Fading BG ================== */
+@media (prefers-reduced-motion: no-preference) {{
+    * {{
+        transition-duration: 0.25s !important;
+    }}
+}}
+/* ================== SMOOTH TEXT TRANSITIONS ================== */
+p, span, label,
+h1, h2, h3, h4, h5, h6,
+li, a, strong, em,
+code, pre,
+th, td,
+svg text, svg tspan {{
+    transition:
+        color 0.25s ease,
+        fill 0.25s ease;
 }}
 
 </style>
@@ -675,7 +752,6 @@ with st.container():
         # ✅ FETCH BUTTON (CORRECT LOCATION)
         fetch_clicked = st.button(
             T["fetch"],
-            use_container_width=True
         )
 
     # ===== RIGHT: info panel =====
@@ -834,7 +910,7 @@ if "nd5_seqs" in st.session_state:
 
 
 # ========== TABS FOR RESULTS / TREE / METHODS ==========
-# ========== TABS FOR RESULTS / TREE / METHODS ==========
+
 tab_results, tab_tree, tab_methods = st.tabs([
     T["results"],
     T["tree"],
@@ -863,12 +939,6 @@ with tab_results:
 
         # ===== insert translated Species header =====
         df_display.insert(0, T["species"], df_display.index)
-
-        # ===== FIX: numeric text color by theme =====
-        number_text_color = (
-            "#606060" if st.session_state.theme_mode == "Light"
-            else THEME["TEXT"]
-        )
 
         styled_df = (
             df_display.style
@@ -1047,3 +1117,4 @@ with tab_tree:
                 file_name="nd5_phylogenetic_tree.png",
                 mime="image/png"
             )
+
