@@ -36,30 +36,8 @@ st.set_page_config(
     layout="centered",
     initial_sidebar_state="collapsed"  # 👈 IMPORTANT
 )
-# ===============================
-# THEME STATE
-# ===============================
-if "theme_mode" not in st.session_state:
-    st.session_state.theme_mode = "Dark"
 
-with st.expander("⚙️ Settings", expanded=False):
-    st.markdown("### 🎛️ Interface")
-
-    col1, col2 = st.columns(2)
-
-    with col1:
-        st.radio(
-            "Theme",
-            ["Dark", "Light"],
-            key="theme_mode"
-        )
-
-    with col2:
-        language = st.selectbox(
-            "Language",
-            ["English", "ภาษาไทย"]
-        )
-
+language = st.selectbox("Language", ["English", "ภาษาไทย"])
 
 DARK = {
     "BG": "#0d1117",
@@ -76,27 +54,16 @@ DARK = {
     "TABLE_TEXT" : "#535353"
 }
 
-LIGHT = {
-    "BG": "#ffffff",
-    "TEXT": "#111827",
-    "TEXT_MUTED": "#6b7280",
-    "SIDEBAR_BG": "#f3f4f6",
-    "PANEL_BG": "#ffffff",
-    "BORDER": "#d1d5db",
-    "CODE_BG": "#f9fafb",
-    "CODE_TEXT": "#111827",
-    "BTN_BG": "#2563eb",
-    "BTN_TEXT": "#ffffff",
-    "TREE_BORDER_BG" : "#d8e6fe",
-    "TABLE_TEXT" : "#606060"
-}
-THEME = DARK if st.session_state.theme_mode == "Dark" else LIGHT
-# ---------- THEME STATE (SAFE DEFAULT) ----------
-# HARD layout lock (do NOT remove)
+THEME = DARK 
 st.markdown('<div style="height:48px"></div>', unsafe_allow_html=True)
 
-st.markdown(
-f"""
+gdg_accent  = "#238636"
+gdg_sel     = "rgba(35, 134, 54, 0.30)"
+gdg_region  = "rgba(35, 134, 54, 0.18)"
+gdg_overlay = "rgba(35, 134, 54, 0.12)"
+gdg_hover   = "rgba(35, 134, 54, 0.08)"
+
+st.markdown(f"""
 <style>
 
 /* ================== THEME VARIABLES ================== */
@@ -125,9 +92,9 @@ h1, h2, h3, h4, h5, h6 {{
     color: var(--text) !important;
 }}
 
-/* Hide Streamlit header */
 header[data-testid="stHeader"] {{
-    display: none !important;
+    display: block !important;
+    background: var(--bg) !important;
 }}
 
 /* ================== BUTTONS ================== */
@@ -140,7 +107,6 @@ header[data-testid="stHeader"] {{
     border: none !important;
 }}
 
-/* >>> FORCE BUTTON WIDTH (300%) <<< */
 div[data-testid="stButton"] > button {{
     width: 300% !important;
     min-width: 160px !important;
@@ -157,8 +123,6 @@ div[data-testid="stExpander"] > details > summary {{
     border: 1px solid var(--border) !important;
     border-radius: 12px !important;
     padding: 12px !important;
-    display: flex;
-    align-items: center;
 }}
 
 div[data-testid="stExpander"] > details > div[role="region"] {{
@@ -169,74 +133,12 @@ div[data-testid="stExpander"] > details > div[role="region"] {{
     padding: 16px !important;
 }}
 
-/* ================== BLACK SELECT TEXT IN LIGHT MODE ================== */
-
-/* Light mode: make selected values and placeholder black */
-@media (prefers-color-scheme: light) {{
-
-    /* For st.selectbox and st.multiselect containers */
-    div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] > div input,
-    div[data-baseweb="select"] span[id] {{
-        color: #000000 !important;
-    }}
-
-    /* Placeholder text in BaseWeb */
-    div[data-baseweb="select"] div[data-testid="select-container"] {{
-        color: #000000 !important;
-    }}
-}}
-
-/* Dark mode: use theme text color */
-@media (prefers-color-scheme: dark) {{
-
-    div[data-baseweb="select"] > div,
-    div[data-baseweb="select"] > div input,
-    div[data-baseweb="select"] span[id] {{
-        color: var(--text) !important;
-    }}
-
-    div[data-baseweb="select"] div[data-testid="select-container"] {{
-        color: var(--text) !important;
-    }}
-}}
-
-/* ================== PANELS ================== */
-div[data-testid="stMetric"],
-div[data-testid="stDataFrame"] {{
-    background-color: var(--panel-bg) !important;
-    border: 1px solid var(--border) !important;
-    border-radius: 12px !important;
-}}
-
-/* ================== DATAFRAME FIX ================== */
-[data-testid="stDataFrame"] {{
-    width: 100% !important;
-}}
-
-[data-testid="stDataFrame"] th,
-[data-testid="stDataFrame"] td {{
-    white-space: normal !important;
-    word-break: break-word !important;
-    text-align: center !important;
-    font-size: 14px !important;
-}}
-
-[data-testid="stDataFrame"] th:first-child {{
-    min-width: 140px !important;
-}}
-
-/* ================== CODE BLOCKS ================== */
-pre, code {{
-    background-color: var(--code-bg) !important;
-    color: var(--code-text) !important;
-    border-radius: 10px !important;
-}}
-
 /* ================== SELECT ================== */
 div[data-baseweb="select"] > div {{
     background-color: var(--panel-bg) !important;
     border: 1px solid var(--border) !important;
+    min-height: 48px !important;
+    padding: 4px 8px !important;
 }}
 
 div[data-baseweb="select"] span,
@@ -249,27 +151,11 @@ li[role="option"] {{
     color: var(--text) !important;
 }}
 
-/* ================== SELECT ARROW FIX ================== */
-
-/* Light mode: make dropdown arrow visible (black) */
-@media (prefers-color-scheme: light) {{
-
-    /* BaseWeb select arrow */
-    div[data-baseweb="select"] svg {{
-        fill: #000000 !important;
-        color: #000000 !important;
-    }}
+/* ================== DATAFRAME ================== */
+div[data-testid="stDataFrame"] {{
+    width: 300% !important;
+    overflow-x: auto !important;
 }}
-
-/* Dark mode: follow theme text color */
-@media (prefers-color-scheme: dark) {{
-
-    div[data-baseweb="select"] svg {{
-        fill: var(--text) !important;
-        color: var(--text) !important;
-    }}
-}}
-
 
 /* ================== METRICS ================== */
 div[data-testid="stMetricLabel"],
@@ -290,65 +176,67 @@ svg tspan {{
     fill: var(--text) !important;
 }}
 
-/* ================== DESKTOP ONLY ================== */
-@media (min-width: 768px) {{
-    div[data-testid="stToolbar"],
-    div[data-testid="stElementToolbar"] {{
-        display: none !important;
-    }}
-
-    header {{
-        visibility: visible !important;
-    }}
+/* ================== DATAFRAME TEXT ================== */
+div[data-testid="stDataFrame"] * {{
+    color: var(--text) !important;
+}}
+div[data-testid="stDataFrame"] div[role="columnheader"] {{
+    color: var(--text) !important;
+    font-weight: 600 !important;
+}}
+div[data-testid="stDataFrame"] div[role="gridcell"] {{
+    background-color: var(--panel-bg) !important;
 }}
 
-/* ================== HIDE STREAMLIT HEADER ================== */
-header[data-testid="stHeader"] {{
-    display: none !important;
+/* ================== ARROWS / ICONS ================== */
+div[data-testid="stExpander"] summary svg {{
+    fill: var(--text) !important;
 }}
-/* ================== Fading BG ================== */
-@media (prefers-reduced-motion: no-preference) {{
-    * {{
-        transition-duration: 0.25s !important;
-    }}
+div[data-baseweb="select"] svg {{
+    fill: var(--text) !important;
 }}
-/* ================== SMOOTH TEXT TRANSITIONS ================== */
-p, span, label,
-h1, h2, h3, h4, h5, h6,
-li, a, strong, em,
-code, pre,
-th, td,
-svg text, svg tspan {{
-    transition:
-        color 0.25s ease,
-        fill 0.25s ease;
+
+/* ================== GLIDE DATAGRID SELECTION (THEME-AWARE) ================== */
+div[data-testid="stDataFrame"] {{
+    --gdg-accent-color:           {gdg_accent}  !important;
+    --gdg-selection-color:        {gdg_sel}     !important;
+    --gdg-selection-region-color: {gdg_region}  !important;
+    --gdg-selection-overlay-color:{gdg_overlay} !important;
+}}
+
+div[data-testid="stDataFrame"] div[role="gridcell"]:hover {{
+    background-color: {gdg_hover} !important;
+}}
+
+div[data-testid="stDataFrame"] .gdg-selection,
+div[data-testid="stDataFrame"] .selection,
+div[data-testid="stDataFrame"] [class*="selection"] {{
+    background: {gdg_sel} !important;
+    outline-color: {gdg_accent} !important;
 }}
 
 </style>
-""",
-unsafe_allow_html=True
-)
+""", unsafe_allow_html=True)
 
 # ========== NCBI CONFIG ==========
 Entrez.email = "poonthakorn@gmail.com"
 
-# ========== SPECIES ACCESSIONS ==========
 species_accessions = {
-    # === Hominidae ===
+    # === Primates ===
     "Human": "NC_012920.1",
+    "Neanderthal": "NC_011137.1",       # ancient human
     "Chimpanzee": "NC_001643.1",
     "Bonobo": "NC_001644.1",
-    "Eastern Gorilla": "NC_011120.1",
+    "Eastern Gorilla": "KF914213.1",
+    "Western Gorilla": "NC_011120.1",
     "Bornean Orangutan": "NC_001646.1",
-
-    # === Lesser apes ===
+    "Sumatran Orangutan": "NC_002083.1",
     "Common Gibbon": "NC_002082.1",
+    "Rhesus Macaque": "NC_005943.1",
 
     # === Old World monkeys ===
-    "Rhesus Macaque": "NC_005943.1",
     "Crab-eating Macaque": "NC_012670.1",
     "Barbary Ape": "NC_002764.1",
-    "Hamadrayas Baboon": "NC_001992.1",
     "Green Monkey": "NC_008066.1",
     "Tantalus Monkey": "NC_009748.1",
     "Dusky Leaf Monkey": "NC_006900.1",
@@ -357,7 +245,7 @@ species_accessions = {
     "Tonkin Snub-nose Monkey": "NC_015485.1",
     "Colobus Monkey": "NC_006901.1",
 
-    # === Other mammals ===
+    # === Other Mammals ===
     "Pig": "NC_000845.1",
     "Cow": "NC_001567.1",
     "Horse": "NC_001640.1",
@@ -365,30 +253,55 @@ species_accessions = {
     "Cat": "NC_001700.1",
     "Sheep": "NC_001941.1",
     "Goat": "NC_005044.2",
-
-    # === Rodents ===
     "Mouse": "NC_005089.1",
     "Rat": "NC_001665.2",
-
-    # === Added to reach 30 ===
     "Rabbit": "NC_001913.1",
-    "Guinea Pig": "NC_000884.1",
+
+    # === Additional Mammals ===
     "Elephant": "NC_000934.1",
-    "Whale": "NC_006853.1"
+    "Whale": "NC_006853.1",
+    "Lion": "NC_028302.1",
+    "Tiger": "NC_010642.1",
+    "Brown Bear": "NC_003427.1",
+    "Dolphin": "NC_012057.1",
+    "Seal": "NC_008416.1",
+
+    # === Birds ===
+    "Chicken": "NC_001323.1",
+    "Duck": "NC_009684.1",
+    "Goose": "NC_003049.1",
+    "Turkey": "NC_010195.1",
+
+    # === Fish ===
+    "Zebrafish": "NC_002333.2",
+    "Salmon": "NC_001960.1",
+    "Tilapia": "NC_013723.1",
+    "Catfish": "NC_015644.1",
+    "Bluefin Tuna": "NC_010383.1",
+
+    # === Reptiles / Amphibians ===
+    "Frog": "NC_002805.1",
+    "Lizard": "NC_018045.1",
+
+    # === Invertebrates ===
+    "Fruit Fly": "NC_024511.2",
+    "Bee": "NC_001566.1",
+    "Octopus": "NC_006353.1",
+    "Roundworms": "NC_001328.1"
 }
-
-
 SPECIES_TH = {
     "Human": "มนุษย์",
+    "Neanderthal": "นีแอนเดอร์ธัล",
     "Chimpanzee": "ชิมแปนซี",
     "Bonobo": "โบโนโบ",
     "Eastern Gorilla": "กอริลลาตะวันออก",
+    "Western Gorilla": "กอริลลาตะวันตก",
     "Bornean Orangutan": "อุรังอุตังบอร์เนียว",
+    "Sumatran Orangutan": "อุรังอุตังสุมาตรา",
     "Common Gibbon": "ชะนี",
     "Rhesus Macaque": "ลิงแสม",
     "Crab-eating Macaque": "ลิงแสมหางยาว",
     "Barbary Ape": "ลิงบาบารี",
-    "Hamadrayas Baboon": "ลิงบาบูนฮามาดรายัส",
     "Green Monkey": "ลิงเขียว",
     "Tantalus Monkey": "ลิงแทนทาลัส",
     "Dusky Leaf Monkey": "ค่างแว่น",
@@ -406,10 +319,30 @@ SPECIES_TH = {
     "Mouse": "หนู",
     "Rat": "หนูท่อ",
     "Rabbit": "กระต่าย",
-    "Guinea Pig": "หนูตะเภา",
     "Elephant": "ช้าง",
-    "Whale": "วาฬ"
+    "Whale": "วาฬ",
+    "Lion": "สิงโต",
+    "Tiger": "เสือโคร่ง",
+    "Brown Bear": "หมีสีน้ำตาล",
+    "Dolphin": "โลมา",
+    "Seal": "แมวน้ำ",
+    "Chicken": "ไก่",
+    "Duck": "เป็ด",
+    "Goose": "ห่าน",
+    "Turkey": "ไก่งวง",
+    "Zebrafish": "ปลาม้าลาย",
+    "Salmon": "ปลาแซลมอน",
+    "Tilapia": "ปลาตะเพียน",
+    "Catfish": "ปลาดุก",
+    "Bluefin Tuna": "ปลาทูน่าครีบใหญ่",
+    "Frog": "กบ",
+    "Lizard": "กิ้งก่า",
+    "Fruit Fly": "แมลงวันผลไม้",
+    "Bee": "ผึ้ง",
+    "Octopus": "หมึกสาย",
+    "Roundworms": "พยาธิตัวกลม"
 }
+
 
 # ========== LANGUAGE SUPPORT ==========
 LANGS = {
@@ -774,23 +707,37 @@ def extract_nd5_cached(accession):
         record = SeqIO.read(handle, "genbank")
         handle.close()
 
-        found = False   # 👈 เพิ่มบรรทัดนี้
+        for feature in record.features:
+            if feature.type == "CDS":
+                gene    = feature.qualifiers.get("gene",    [""])[0].lower().strip()
+                product = feature.qualifiers.get("product", [""])[0].lower().strip()
+                note    = feature.qualifiers.get("note",    [""])[0].lower().strip()
 
+                is_nd5 = any([
+                    gene in ["nd5", "nad5", "mt-nd5", "mtnd5"],
+                    "nad5"  in product,
+                    "nd5"   in product,
+                    "ndh5"  in product,
+                    "subunit 5" in product and "nadh" in product,
+                    "nad5"  in note,
+                    "nd5"   in note,
+                ])
+
+                if is_nd5:
+                    return feature.extract(record.seq)
+
+        # ── fallback: try gene features too (some records skip CDS) ──
         for feature in record.features:
             if feature.type == "gene":
-                gene = feature.qualifiers.get("gene", [""])[0].lower()
-                if gene in ["nd5", "nad5"]:
-                    found = True
-                    start = int(feature.location.start)
-                    end = int(feature.location.end)
-                    return record.seq[start:end]
+                gene = feature.qualifiers.get("gene", [""])[0].lower().strip()
+                if gene in ["nd5", "nad5", "mt-nd5", "mtnd5"]:
+                    return feature.extract(record.seq)
 
-        # ❌ ไม่มี ND5 จริง
-        if not found:
-            return None
+        return None
 
     except Exception:
         return None
+
 
 
 # ========== HELPERS ==========
@@ -840,11 +787,18 @@ if fetch_clicked:
 
             display_name = species_display.get(eng_name, eng_name)
             nd5_seqs[display_name] = seq
+
+        nd5_lengths = {k: len(v) for k, v in nd5_seqs.items()}
                     # ===== FORCE SAME ND5 LENGTH =====
+        
         if nd5_seqs:
             max_len = max(len(seq) for seq in nd5_seqs.values())
             for k in nd5_seqs:
                 nd5_seqs[k] = nd5_seqs[k] + "-" * (max_len - len(nd5_seqs[k]))
+
+        st.session_state["nd5_seqs"] = nd5_seqs
+        st.session_state["nd5_lengths"] = nd5_lengths
+        st.session_state["valid_species"] = list(nd5_seqs.keys())
 
         st.session_state["nd5_seqs"] = nd5_seqs
         if missing_species:
@@ -899,15 +853,14 @@ if "nd5_seqs" in st.session_state:
 
     cols = st.columns(4)
     for i, (name, seq) in enumerate(seqs.items()):
-        cols[i % 4].metric(name, f"{len(seq)} bp")
+        real_len = st.session_state["nd5_lengths"][name]
+        cols[i % 4].metric(name, f"{real_len} bp")
 
     # PREVIEW DIRECTLY UNDER
     with st.expander(T["preview"]):
         for name, seq in seqs.items():
             st.markdown(f"**{name}**")
             st.code(seq[:120] + ("..." if len(seq) > 120 else ""))
-
-
 
 # ========== TABS FOR RESULTS / TREE / METHODS ==========
 
@@ -940,6 +893,9 @@ with tab_results:
         # ===== insert translated Species header =====
         df_display.insert(0, T["species"], df_display.index)
 
+        # ===== FIX: numeric text color by theme =====
+        number_text_color = THEME["TABLE_TEXT"]
+
         styled_df = (
             df_display.style
 
@@ -949,16 +905,8 @@ with tab_results:
             # ----- gradient (numbers only) -----
             .background_gradient(
                 cmap="Blues",
-                subset=df_display.columns[1:]
-            )
-
-            # ----- FORCE numeric text color -----
-            .set_properties(
                 subset=df_display.columns[1:],
-                **{
-                    "color": number_text_color,
-                    "font-weight": "500",
-                }
+                text_color_threshold=0   # 🔥 important fix
             )
 
             # ----- Species column -----
@@ -1010,7 +958,66 @@ with tab_results:
             width="stretch",
             hide_index=True
         )
+        
+        # ===== PAIRWISE DETAIL VIEW =====
+        if df is not None and "nd5_seqs" in st.session_state:
+            st.markdown("---")
 
+            # ===== INSTRUCTION =====
+            st.caption(
+                "Select two species below to compare their ND5 identity score."
+                if language == "English"
+                else "เลือกสปีชีส์สองชนิดเพื่อเปรียบเทียบค่าความเหมือนของ ND5"
+            )
+
+            all_names = list(st.session_state["nd5_seqs"].keys())
+
+            col_a, col_b = st.columns(2)
+            with col_a:
+                species_a = st.selectbox(
+                    "Species A" if language == "English" else "สปีชีส์ A",
+                    options=all_names,
+                    key="pair_a"
+                )
+            with col_b:
+                species_b = st.selectbox(
+                    "Species B" if language == "English" else "สปีชีส์ B",
+                    options=all_names,
+                    index=min(1, len(all_names) - 1),
+                    key="pair_b"
+                )
+
+            with st.expander(
+                "🔍 Pairwise Detail" if language == "English" else "🔍 รายละเอียดคู่สปีชีส์",
+                expanded=True
+            ):
+                if species_a == species_b:
+                    st.info("Select two different species." if language == "English" else "กรุณาเลือกสปีชีส์ที่แตกต่างกัน")
+                else:
+                    # pull identity score from existing df
+                    # df index/columns are in display names already
+                    score = st.session_state["identity_df"].loc[species_a, species_b]
+
+                    if language == "English":
+                        delta_label = (
+                            "identical" if score == 100 else
+                            "very close" if score >= 95 else
+                            "moderately similar" if score >= 80 else
+                            "distantly related"
+                        )
+                    else:
+                        delta_label = (
+                            "เหมือนกันทุกประการ" if score == 100 else
+                            "ใกล้ชิดมาก" if score >= 95 else
+                            "คล้ายคลึงปานกลาง" if score >= 80 else
+                            "ห่างไกลทางวิวัฒนาการ"
+                        )
+
+                    st.metric(
+                        label=f"{species_a}  ↔  {species_b}",
+                        value=f"{score:.2f}%",
+                        delta=delta_label
+                    )
     else:
         st.info(T["no_results"])
 
@@ -1064,8 +1071,8 @@ with tab_tree:
             label_func=lambda x: x.name if x.name else ""
         )
 
-        TEXT_COLOR = "#9CA3AF" if st.session_state.theme_mode == "Dark" else "#000000"
-        BRANCH_COLOR = "#CBD5E1" if st.session_state.theme_mode == "Dark" else "#000000"
+        TEXT_COLOR = "#9CA3AF"
+        BRANCH_COLOR = "#CBD5E1"
 
         for text in ax.texts:
             text.set_fontproperties(font_prop)
@@ -1117,4 +1124,3 @@ with tab_tree:
                 file_name="nd5_phylogenetic_tree.png",
                 mime="image/png"
             )
-
