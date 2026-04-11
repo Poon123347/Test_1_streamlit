@@ -355,7 +355,7 @@ LANGS = {
         "select_species": "กรุณาเลือกสายพันธุ์ตัวอย่าง (อย่างน้อย 2 ชนิด)",
         "choose_options": "เลือกสายพันธุ์",
         "available": "สายพันธุ์ทั้งหมด",
-        "selected": "ที่เลือก",
+        "selected": "สายพันธุ์ที่เลือก",
         "fetch": "ดึงข้อมูล",
 
         # ===== Info =====
@@ -382,7 +382,7 @@ LANGS = {
         # ===== Expanders =====
         "methods_expander": "🔬 กลไกระดับโมเลกุล ขั้นตอน และวัตถุประสงค์",
 
-        "species" : "สปีชีส์"
+        "species" : "สายพันธุ์"
     },
 
     "English": {
@@ -975,13 +975,13 @@ with tab_results:
             col_a, col_b = st.columns(2)
             with col_a:
                 species_a = st.selectbox(
-                    "Species A" if language == "English" else "สปีชีส์ A",
+                    "Species A" if language == "English" else "สายพันธุ์ที่ 1",
                     options=all_names,
                     key="pair_a"
                 )
             with col_b:
                 species_b = st.selectbox(
-                    "Species B" if language == "English" else "สปีชีส์ B",
+                    "Species B" if language == "English" else "สายพันธุ์ที่ 2",
                     options=all_names,
                     index=min(1, len(all_names) - 1),
                     key="pair_b"
