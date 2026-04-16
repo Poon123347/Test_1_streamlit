@@ -369,11 +369,10 @@ LANGS = {
         # ===== Expanders =====
         "methods_expander": "🔬 กลไกระดับโมเลกุล ขั้นตอน และวัตถุประสงค์",
 
-        "branch_length_note": "ความยาวกิ่งถูกปรับสเกลและแสดงบนแต่ละกิ่ง",
-
-        "branch_color_note": "สีกิ่ง: เขียว (สั้น) ถึง แดง (ยาว).",
-
-        "branch_number_note": "ตัวเลขแสดงความยาวกิ่งที่ปรับสเกลเป็น 0 ถึง 1",
+        "tree_description": "แผนภาพนี้แสดงความสัมพันธ์ทางวิวัฒนาระหว่างสายพันธุ์ตามลำดับ DNA ND5 สายพันธุ์ที่เชื่อมต่อกันดีโดยกิ่งที่สั้นกว่านั้นมีความสัมพันธุ์ที่ใกล้เคียงกัน ซึ่งหมายว่า DNA มีความคล้ายคลึงมาก ระยะห่างที่ยาวขึ้นระหว่างกิ่งน้อยต่อบ่งชี้ถึงความแตกต่างทางพันธุ์มากขึ้น ตัวเลขบนเส้นแสดงภาวะห่างของระยะห่างทางพันธุ์สาภียน (สีเขียว = ใกล้เคียง, สีแดง = ห่างกันมาก)",
+        "branch_length_note": "",
+        "branch_color_note": "",
+        "branch_number_note": "",
 
         "taxa_axis": "สายพันธุ์",
         "branch_axis": "ความยาวกิ่ง",
@@ -419,11 +418,10 @@ LANGS = {
         # ===== Expanders =====
         "methods_expander": "🔬 Molecular mechanisms, pipeline and objectives",
 
-        "branch_length_note": "Branch lengths are normalized and shown on each branch.",
-
-        "branch_color_note": "Branch colors: green (short) to red (long).",
-
-        "branch_number_note": "Branch numbers show normalized branch length from 0 to 1.",
+        "tree_description": "This diagram shows the evolutionary relationships between species based on their ND5 DNA sequences. Species that are connected by shorter branches are more closely related, meaning their DNA is more similar. Longer distances between branches indicate greater genetic differences. The numbers on the lines represent the relative genetic distance between species (green branches = shorter, red branches = longer).",
+        "branch_length_note": "",
+        "branch_color_note": "",
+        "branch_number_note": "",
 
         "taxa_axis": "taxa",
         "branch_axis": "branch length",
@@ -689,7 +687,7 @@ with st.container():
     with controls_col:
         CATEGORIES = {
             "Primates" if language == "English" else "อันดับวานร": [
-                "Human", "Neanderthal", "Chimpanzee", "Bonobo",
+                "Human", "Neanderthal", "Denisovan", "Chimpanzee", "Bonobo",
                 "Eastern Gorilla", "Western Gorilla", "Bornean Orangutan",
                 "Sumatran Orangutan", "Common Gibbon", "Rhesus Macaque",
                 "Crab-eating Macaque", "Barbary Ape", "Green Monkey",
@@ -755,6 +753,11 @@ with st.container():
         fetch_clicked = st.button(
             T["fetch"],
         )
+
+    # ===== RIGHT: info panel =====
+    with info_col:
+        st.metric(T["available"], len(species_accessions))
+        st.metric(T["selected"], len(selected_species))
 
 # ========== CACHING FOR FETCH ==========
 @st.cache_data(show_spinner=False)
@@ -925,26 +928,14 @@ if "nd5_seqs" in st.session_state:
     </p>
     """, unsafe_allow_html=True)
 
-    # ── 4-column stats row ──
-    s1, s2, s3, s4 = st.columns(4)
-
-    # Available species
-    s1.metric(
-        "Available" if language == "English" else "สายพันธุ์ทั้งหมด",
-        len(species_accessions)
-    )
-
-    # Selected species
-    s2.metric(
-        "Selected" if language == "English" else "ที่เลือก",
-        len(seqs)
-    )
+    # ── 2-column stats row ──
+    s1, s2 = st.columns(2)
 
     # Average identity
     avg_identity = st.session_state.get("avg_identity")
     avg_value = f"{avg_identity}%" if avg_identity is not None else "—"
 
-    s3.metric(
+    s1.metric(
         "Avg identity" if language == "English" else "ความเหมือนเฉลี่ย",
         avg_value
     )
@@ -959,7 +950,7 @@ if "nd5_seqs" in st.session_state:
     else:
         value = "—"
 
-    s4.metric(
+    s2.metric(
         "ND5 length" if language == "English" else "ความยาว ND5",
         value
     )
@@ -1207,7 +1198,6 @@ with tab_tree:
     if tree is None:
         st.info(T["no_tree"])
     else:
-        # ===== NORMALIZE BRANCH LENGTH =====
         lengths = [
             clade.branch_length
             for clade in tree.find_clades()
@@ -1220,54 +1210,28 @@ with tab_tree:
                 if clade.branch_length:
                     clade.branch_length /= max_len
 
-        # ===== FIGURE (RESPONSIVE SAFE) =====
         fig = plt.figure(
             figsize=(10, 5),
-            facecolor=THEME["TREE_BORDER_BG"]
+            facecolor=THEME["PANEL_BG"]
         )
+        fig.patch.set_facecolor(THEME["PANEL_BG"])
         ax = fig.add_subplot(111)
         ax.set_facecolor(THEME["PANEL_BG"])
-
-        TEXT_COLOR = "#9CA3AF"
-        BRANCH_COLOR = "#CBD5E1"
 
         Phylo.draw(
             tree,
             axes=ax,
             do_show=False,
             show_confidence=False,
-            label_func=lambda x: translate_species(x.name, language) if x.name else "",
-            branch_labels=lambda x: f"{x.branch_length:.2f}" if x.branch_length else ""
+            label_func=lambda x: x.name if x.name else ""
         )
 
-        ax.set_xlabel(T["branch_axis"], color=TEXT_COLOR, fontsize=11)
-        ax.set_ylabel(T["taxa_axis"], color=TEXT_COLOR, fontsize=11)
-        ax.xaxis.labelpad = 12
-        ax.yaxis.labelpad = 12
+        TEXT_COLOR = "#9CA3AF"
+        BRANCH_COLOR = "#CBD5E1"
 
-        legend_text = (
-            f"{T['branch_length_note']} {T['branch_color_note']} {T['branch_number_note']}"
-        )
-        ax.text(
-            0.01,
-            0.98,
-            legend_text,
-            transform=ax.transAxes,
-            fontsize=9,
-            color=TEXT_COLOR,
-            va='top',
-            ha='left',
-            bbox={
-                'facecolor': THEME['PANEL_BG'],
-                'edgecolor': THEME['TEXT_MUTED'],
-                'boxstyle': 'round,pad=0.4',
-                'alpha': 0.8
-            }
-        )
-
-        ax.set_xticks(np.linspace(0, 1.0, 5))
-        ax.tick_params(axis='x', bottom=True, labelbottom=True, labelleft=False, colors=TEXT_COLOR, labelsize=9)
-        ax.set_xlim(left=0, right=1.03)
+        for text in ax.texts:
+            text.set_fontproperties(font_prop)
+            text.set_color(TEXT_COLOR)
 
         n = len(tree.get_terminals())
         font_size = max(8, 14 - n)
@@ -1277,63 +1241,46 @@ with tab_tree:
             thai_font = font_manager.FontProperties(fname=FONT_PATH)
 
         for text in ax.texts:
-            text_str = text.get_text().strip()
             text.set_fontsize(font_size)
             text.set_color(TEXT_COLOR)
             if thai_font:
                 text.set_fontproperties(thai_font)
                 text.set_fontfamily("sans-serif")
 
-            # Move and highlight branch length labels
-            if re.fullmatch(r"-?\d+\.\d+", text_str):
-                x, y = text.get_position()
-                text.set_position((x, y + 0.045))
-                text.set_ha('center')
-                text.set_va('bottom')
-                text.set_rotation(0)
-                text.set_zorder(3)
-                text.set_fontweight('bold')
-                text.set_bbox({
-                    'facecolor': THEME['PANEL_BG'],
-                    'edgecolor': THEME['TEXT_MUTED'],
-                    'boxstyle': 'round,pad=0.22',
-                    'alpha': 0.85
-                })
-            else:
-                text.set_ha('left')
-                text.set_va('center')
-                text.set_bbox(None)
-
-        # Collect visual lengths for normalization
-        visual_lengths = []
         for collection in ax.collections:
             if isinstance(collection, LineCollection):
-                total_length = 0
-                for path in collection.get_paths():
-                    verts = path.vertices
-                    for i in range(len(verts) - 1):
-                        dx = verts[i+1][0] - verts[i][0]
-                        dy = verts[i+1][1] - verts[i][1]
-                        total_length += (dx**2 + dy**2)**0.5
-                visual_lengths.append(total_length)
-
-        max_vis_len = max(visual_lengths) if visual_lengths else 1
-
-        for i, collection in enumerate(ax.collections):
-            if isinstance(collection, LineCollection):
-                line_color_norm = visual_lengths[i] / max_vis_len
-                color = plt.get_cmap('RdYlGn_r')(line_color_norm)
-                collection.set_color(color)
-                collection.set_linewidth(2.2)
+                collection.set_color(BRANCH_COLOR)
+                collection.set_linewidth(2.4)
                 collection.set_alpha(1.0)
 
-        ax.margins(x=0.06, y=0.22)
+        ax.margins(x=0.0, y=0.22)
+        ax.set_xlabel(
+            T["branch_axis"],
+            color=TEXT_COLOR,
+            fontproperties=font_prop,
+            labelpad=10,
+            fontsize=9
+        )
+        ax.set_ylabel(
+            T["taxa_axis"],
+            color=TEXT_COLOR,
+            fontproperties=font_prop,
+            labelpad=10,
+            fontsize=9
+        )
         ax.tick_params(left=False, bottom=False, labelleft=False, labelbottom=False)
+
+        terminals = tree.get_terminals()
+        if terminals:
+            root_y = (len(terminals) - 1) / 2
+            curr_xlim = ax.get_xlim()
+            ax.set_xlim(left=-0.04, right=curr_xlim[1] + 0.02)
 
         for spine in ax.spines.values():
             spine.set_visible(False)
 
         fig.tight_layout()
+        fig.subplots_adjust(left=0.04, right=0.98, top=0.95, bottom=0.08)
         st.pyplot(fig, width = "stretch")
 
         buf = BytesIO()
@@ -1348,7 +1295,7 @@ with tab_tree:
         _, c, _ = st.columns([1, 2, 1])
         with c:
             st.download_button(
-                T["download_tree"],
+                "Download phylogenetic tree (PNG)",
                 data=buf.getvalue(),
                 file_name="nd5_phylogenetic_tree.png",
                 mime="image/png"
